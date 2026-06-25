@@ -34,29 +34,29 @@
   --blur:24px;
 }
 [data-theme="dark"]{
-  --primary:#2dd4bf;
-  --primary-dark:#14b8a6;
-  --primary-light:#0c2e2b;
-  --accent:#5eead4;
-  --accent2:#2dd4bf;
-  --green:#4ade80;
-  --green-soft:#0c2e1a;
-  --bg:#04201d;
-  --bg2:#072925;
-  --card:rgba(13,40,38,.42);
-  --card-solid:#0d2826;
-  --glass-border:rgba(90,190,180,.18);
-  --text:#dcf5f1;
-  --text-soft:#7eaaa4;
-  --border:rgba(70,160,150,.22);
-  --shadow:0 8px 30px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
-  --shadow-hover:0 22px 50px rgba(0,0,0,.6), 0 8px 18px rgba(0,0,0,.4);
-  --shadow-3d:0 1px 0 rgba(90,190,180,.15) inset, 0 20px 40px -12px rgba(0,0,0,.7);
-  --sidebar:rgba(7,33,30,.45);
-  --grad-primary:linear-gradient(135deg,#14b8a6 0%,#2dd4bf 100%);
-  --grad-accent:linear-gradient(135deg,#2dd4bf 0%,#0a6e66 100%);
-  --grad-green:linear-gradient(135deg,#16a34a 0%,#4ade80 100%);
-  --grad-bg:radial-gradient(1200px 600px at 85% -5%, #0a3e38 0%, transparent 55%), radial-gradient(1000px 700px at -10% 110%, #07332e 0%, transparent 50%), linear-gradient(160deg,#04201d 0%,#072925 100%);
+  --primary:#5eaea0;
+  --primary-dark:#4d9388;
+  --primary-light:#162a28;
+  --accent:#7fc4b8;
+  --accent2:#5eaea0;
+  --green:#6bbf8a;
+  --green-soft:#16291c;
+  --bg:#0e1a1d;
+  --bg2:#13242a;
+  --card:rgba(20,38,42,.55);
+  --card-solid:#162a2e;
+  --glass-border:rgba(120,180,170,.12);
+  --text:#cfd8d6;
+  --text-soft:#7a9892;
+  --border:rgba(90,140,130,.16);
+  --shadow:0 8px 30px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.22);
+  --shadow-hover:0 22px 50px rgba(0,0,0,.45), 0 8px 18px rgba(0,0,0,.3);
+  --shadow-3d:0 1px 0 rgba(120,180,170,.08) inset, 0 20px 40px -12px rgba(0,0,0,.55);
+  --sidebar:rgba(15,30,34,.5);
+  --grad-primary:linear-gradient(135deg,#4d9388 0%,#6cb0a3 100%);
+  --grad-accent:linear-gradient(135deg,#7fc4b8 0%,#4d9388 100%);
+  --grad-green:linear-gradient(135deg,#4d9388 0%,#6bbf8a 100%);
+  --grad-bg:radial-gradient(1200px 600px at 85% -5%, #16322d 0%, transparent 55%), radial-gradient(1000px 700px at -10% 110%, #122a26 0%, transparent 50%), linear-gradient(160deg,#0e1a1d 0%,#13242a 100%);
   --blur:26px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -660,17 +660,40 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
       </div>
       <div id="aiSummaryContainer" style="display:none;margin-bottom:20px"></div>
       <div class="kpi-grid" id="reportKpis"></div>
+
+      <!-- منحنى السنين -->
       <div class="panel">
-        <div class="panel-head"><h2>الطلبات حسب الخدمة</h2></div>
-        <div style="padding:22px" id="chartByService"></div>
+        <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <h2>📈 منحنى الطلبات عبر الزمن</h2>
+          <select id="timeChartMode" onchange="renderTimeChart()" style="padding:8px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:.86rem">
+            <option value="month">شهري</option>
+            <option value="year" selected>سنوي</option>
+          </select>
+        </div>
+        <div style="padding:22px" id="timeChart"></div>
       </div>
-      <div class="panel">
-        <div class="panel-head"><h2>الطلبات حسب الحالة</h2></div>
-        <div style="padding:22px" id="chartByStatus"></div>
+
+      <!-- صف لوحات المعلومات -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:22px">
+        <div class="panel">
+          <div class="panel-head"><h2>الطلبات حسب الخدمة</h2></div>
+          <div style="padding:22px" id="chartByService"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>الطلبات حسب الحالة</h2></div>
+          <div style="padding:22px" id="chartByStatus"></div>
+        </div>
       </div>
-      <div class="panel">
-        <div class="panel-head"><h2>أعلى الدول حسب عدد الطلبات</h2></div>
-        <div style="padding:22px" id="chartByCountry"></div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:22px">
+        <div class="panel">
+          <div class="panel-head"><h2>أعلى الدول حسب عدد الطلبات</h2></div>
+          <div style="padding:22px" id="chartByCountry"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>الطلبات حسب الشركة</h2></div>
+          <div style="padding:22px" id="chartByCompany"></div>
+        </div>
       </div>
     </section>
   </main>
@@ -731,6 +754,41 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
   </div>
 </div>
 
+<!-- مودال استكمال الطلب -->
+<div class="overlay" id="completeOverlay">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <div class="ti">
+        <h2>استكمال متطلبات الطلب</h2>
+        <p id="completeSub">رفع المستندات المطلوبة وإضافة تعليق</p>
+      </div>
+      <button class="close-x" onclick="closeCompleteModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="completeNote" style="background:var(--primary-light);padding:14px;border-radius:12px;margin-bottom:18px;font-size:.9rem;border-right:4px solid var(--primary);display:none">
+        <b>ملاحظة المراجع:</b> <span id="completeReviewerNote"></span>
+      </div>
+      <div class="field">
+        <label>المستندات الإضافية</label>
+        <div class="file-drop" onclick="document.getElementById('completeFile').click()">
+          <div class="fi">📎</div>
+          <div class="ft">اضغط لرفع ملف (PDF, DOCX, PNG, JPG)</div>
+          <div class="fn" id="completeFileName"></div>
+        </div>
+        <input type="file" id="completeFile" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none" onchange="onCompleteFile()">
+      </div>
+      <div class="field">
+        <label>تعليقك على الاستكمال</label>
+        <textarea id="completeComment" placeholder="اكتب تعليقك هنا..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="submitCompletion()">📤 إرسال الاستكمال</button>
+      <button class="btn btn-ghost" onclick="closeCompleteModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <!-- مساعد بحرة الذكي (Chatbot) -->
 <button class="ai-chat-fab" id="aiChatFab" onclick="toggleAiChat()" title="المساعد الذكي" style="display:none">🤖</button>
 <div class="ai-chat-panel" id="aiChatPanel">
@@ -782,26 +840,29 @@ const SAUDI_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdoAAAE/CAIAAA
    كل خدمة: id, name, desc, icon, fields[]
    نوع الحقل: text | number | date | select | textarea | file | email | tel
    ============================================================ */
+// قائمة الشركات الموحّدة
+const COMPANIES = ["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"];
+// قائمة الدول الموحّدة
+const COUNTRIES = ["السعودية","الإمارات","الكويت","قطر","البحرين","عمان","مصر","الأردن","العراق","لبنان","المغرب","تونس","الجزائر","السودان","ليبيا","اليمن","سوريا","فلسطين","موريتانيا","الصومال","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","فرنسا","بريطانيا","إيطاليا","إسبانيا","الصين","الهند","تركيا","ماليزيا","إندونيسيا","سنغافورة","اليابان","كوريا الجنوبية","الولايات المتحدة","كندا","البرازيل","المكسيك","أخرى"];
+
 const SERVICES = [
   {
     id:"buyer_visit", name:"تقديم الدعم خلال زيارة المشتري المحتمل",
     desc:"تعويض المستفيد في تأمين الفرص التجارية الجديدة من خلال تغطية جزء من الرسوم ذات الصلة بالتعامل مع المشترين الدوليين.",
     icon:"🤝", code:"BVR",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
-      {k:"visit_type",l:"نوع الزيارة",t:"select",req:true,opts:["زيارة مشتري محتمل","زيارة سوق جديد","زيارة معرض","أخرى"]},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
-      {k:"buyer_name",l:"اسم المستفيد المحتمل",t:"text",req:true},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
+      {k:"buyer_name",l:"اسم المشتري المحتمل",t:"text",req:true},
+      {k:"target_country",l:"دولة المشتري",t:"select",req:true,opts:COUNTRIES},
+      {k:"city",l:"المدينة",t:"text",req:true},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["تذاكر السفر","الإقامة والتنقل","الفعاليات","البيانات ذات الصلة","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["تذاكر السفر","الإقامة والتنقل","الفعاليات","البيانات ذات الصلة","أخرى"]},
       {k:"desc",l:"الوصف",t:"textarea",req:false},
-      {k:"doc_cr",l:"مستخرج من السجل التجاري",t:"file",req:true},
-      {k:"doc_auth",l:"تفويض من الشركة لمقدم الطلب",t:"file",req:true},
-      {k:"doc_id",l:"هوية مقدم الطلب",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -809,17 +870,17 @@ const SERVICES = [
     desc:"تعويض المستفيد في تجنب الرسوم ذات الصلة بفهم المتطلبات أو حجم الطلب في الأسواق الجديدة وإعداد استراتيجيات الدخول إلى السوق/النمو.",
     icon:"💼", code:"CNS",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
       {k:"service_name",l:"اسم مزود الخدمة",t:"text",req:true},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["استراتيجيات دخول الأسواق الأجنبية","استطلاعات مرئيات المستهلكين","إعداد خطة الأعمال الدولية","دراسات تشخيصية لسلاسل التوريد","استراتيجية سلسلة التوريد","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["استراتيجيات دخول الأسواق الأجنبية","استطلاعات مرئيات المستهلكين","إعداد خطة الأعمال الدولية","دراسات تشخيصية لسلاسل التوريد","استراتيجية سلسلة التوريد","أخرى"]},
       {k:"desc",l:"وصف الاستشارة",t:"textarea",req:false},
-      {k:"doc",l:"المرفقات (عرض السعر/العقد)",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -827,19 +888,18 @@ const SERVICES = [
     desc:"تعويض المستفيد في تحديد الفرص التجارية الجديدة من خلال حضور المعارض الدولية والتجارية التي يختارها.",
     icon:"🌍", code:"TRAD",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
       {k:"exhibition_name",l:"اسم المعرض",t:"text",req:true},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
       {k:"city",l:"المدينة",t:"text",req:true},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["رسوم التسجيل في المعارض الدولية","استئجار مساحة الجناح","إرسال عينات","تصميم وبناء الجناح","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["رسوم التسجيل في المعارض الدولية","استئجار مساحة الجناح للشركة والخدمات التي تقدمها","إرسال عينات من إنتاج المعرض إلى المعرض","تصميم الجناح وبنائه","أخرى"]},
       {k:"desc",l:"وصف المعرض",t:"textarea",req:false},
-      {k:"doc",l:"المستندات الداعمة",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -847,18 +907,17 @@ const SERVICES = [
     desc:"تعويض المستفيد في فهم المتطلبات القانونية ذات الصلة بالصادرات وبالأسواق الجديدة ومعالجتها.",
     icon:"⚖️", code:"LGL",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
       {k:"office_name",l:"اسم مكتب المحاماة",t:"text",req:true},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["مراجعة عقود","تسجيل علامة تجارية","استشارة قانونية","معالجة نزاع","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["مراجعة عقود","تسجيل علامة تجارية","استشارة قانونية","معالجة نزاع","أخرى"]},
       {k:"desc",l:"وصف الحالة",t:"textarea",req:false},
-      {k:"doc",l:"المستندات القانونية",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -866,19 +925,17 @@ const SERVICES = [
     desc:"تعويض المستفيد في تسجيل منتجاته أو خدماته وتسويقها على منصات التجارة الإلكترونية.",
     icon:"🛒", code:"ECO",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
-      {k:"platform_name",l:"اسم المنصة",t:"select",req:true,opts:["Amazon","Alibaba","Made-in-China","Tradekey","أخرى"]},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
+      {k:"platform_name",l:"اسم المنصة",t:"select",req:true,opts:["Amazon","Alibaba","Made-in-China","Tradekey","Global Sources","أخرى"]},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["تسجيل المنتجات","التسويق الرقمي","إدارة الحساب","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["تسجيل المنتجات","التسويق الرقمي","إدارة الحساب","أخرى"]},
       {k:"desc",l:"الوصف",t:"textarea",req:false},
-      {k:"doc_cr",l:"مستخرج من السجل التجاري",t:"file",req:true},
-      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -886,19 +943,18 @@ const SERVICES = [
     desc:"تعويض المستفيد في تسجيل منتجاته في الأسواق الدولية لتمكينه من الدخول إلى السوق وتحقيق المبيعات فيه.",
     icon:"📜", code:"PCER",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
       {k:"product_name",l:"اسم المنتج",t:"text",req:true},
       {k:"cert_type",l:"نوع الشهادة",t:"select",req:true,opts:["شهادة منشأ","شهادة مطابقة","تسجيل منتج","شهادة جودة","أخرى"]},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["تسجيل المنتج","إصدار شهادة","اختبارات المطابقة","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["تسجيل المنتج","إصدار شهادة","اختبارات المطابقة","أخرى"]},
       {k:"desc",l:"الوصف",t:"textarea",req:false},
-      {k:"doc",l:"مستندات المنتج",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -906,15 +962,16 @@ const SERVICES = [
     desc:"تعويض المستفيد في تجاوز الحواجز اللغوية ذات الصلة بالفرص الخارجية الجديدة.",
     icon:"🗣️", code:"LNG",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"target_language",l:"اللغة المستهدفة",t:"select",req:true,opts:["إنجليزية","فرنسية","ألمانية","صينية","يابانية","كورية","إسبانية","روسية","تركية","أخرى"]},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["ترجمة مستندات","ترجمة فورية","توطين موقع","ترجمة تسويقية","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["ترجمة مستندات","ترجمة فورية","توطين موقع","ترجمة تسويقية","أخرى"]},
       {k:"desc",l:"الوصف",t:"textarea",req:false},
-      {k:"doc",l:"المرفقات",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -922,19 +979,18 @@ const SERVICES = [
     desc:"تعويض المستفيد في تجنب الرسوم ذات الصلة بتخصيص منتجاته وخدماته للمواءمة مع متطلبات السوق الأجنبية أو احتياجاتها.",
     icon:"🛠️", code:"CUS",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
       {k:"service_type",l:"نوع الخدمة",t:"select",req:true,opts:["تعديل تصميم","تعديل مواصفات","تغليف","متطلبات تنظيمية","أخرى"]},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
       {k:"new_market",l:"هل يتم استهداف سوق جديد؟",t:"select",req:true,opts:["نعم","لا"]},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["تخصيص المنتج","تعديل التغليف","المواءمة التنظيمية","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["تخصيص المنتج","تعديل التغليف","المواءمة التنظيمية","أخرى"]},
       {k:"desc",l:"الوصف",t:"textarea",req:false},
-      {k:"doc",l:"المستندات الداعمة",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -942,19 +998,18 @@ const SERVICES = [
     desc:"تقديم الدعم للمستفيدين في صقل مهارات موظفيهم في بعض مجالات التصدير من خلال الدورات التدريبية والشهادات.",
     icon:"🎓", code:"TRN",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
       {k:"training_name",l:"اسم البرنامج التدريبي",t:"text",req:true},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
+      {k:"trainees",l:"عدد المتدربين",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
-      {k:"trainees",l:"عدد المتدربين",t:"number",req:true},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["دورات تدريبية","شهادات احترافية","ورش عمل","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["دورات تدريبية","شهادات احترافية","ورش عمل","أخرى"]},
       {k:"desc",l:"وصف البرنامج",t:"textarea",req:false},
-      {k:"doc",l:"عرض السعر/الشهادات",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   },
   {
@@ -962,18 +1017,16 @@ const SERVICES = [
     desc:"تعويض المستفيد في تسويق منتجاته أو خدماته دولياً.",
     icon:"📣", code:"MADV",
     fields:[
-      {k:"company",l:"الشركة",t:"select",req:true,opts:["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"]},
-      {k:"price_offer",l:"مبلغ عرض السعر",t:"number",req:true},
-      {k:"currency",l:"العملة",t:"currency",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز",t:"number",req:true},
-      {k:"revenue_currency",l:"العملة",t:"currency",req:true},
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"price_offer",l:"مبلغ عرض السعر (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة نتيجة الحصول على الحافز (ر.س)",t:"number",req:true},
       {k:"start_date",l:"تاريخ بداية الاستفادة من الخدمة",t:"date",req:true},
       {k:"end_date",l:"تاريخ الانتهاء من الخدمة",t:"date",req:true},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:["الإمارات","مصر","السودان","ليبيا","العراق","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","سوريا","أخرى"]},
-      {k:"activities",l:"الأنشطة المشمولة",t:"select",req:true,opts:["إعلان رقمي","وسائل التواصل","مواد تسويقية","معرض ترويجي","الكل"]},
+      {k:"activities",l:"الأنشطة المشمولة",t:"checkboxes",req:true,opts:["إعلان رقمي","وسائل التواصل","مواد تسويقية","معرض ترويجي","أخرى"]},
       {k:"desc",l:"الوصف",t:"textarea",req:false},
-      {k:"doc_cr",l:"مستخرج من السجل التجاري",t:"file",req:true},
-      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true}
+      {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
   }
 ];
@@ -1172,8 +1225,17 @@ function fieldHTML(f){
   const req=f.req?'<span class="req">*</span>':'';
   let input="";
   if(f.t==="textarea") input=`<textarea id="fld_${f.k}" placeholder="${f.l}"></textarea>`;
-  else if(f.t==="currency"){
-    input=`<select id="fld_${f.k}"><option value="ريال سعودي" selected>ريال سعودي (ر.س)</option><option value="دولار أمريكي">دولار أمريكي ($)</option><option value="يورو">يورو (€)</option><option value="درهم إماراتي">درهم إماراتي</option></select>`;
+  else if(f.t==="checkboxes"){
+    // اختيار متعدد + خانة "أخرى" نصية تظهر عند اختيارها
+    const items=f.opts.map(o=>`
+      <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;background:var(--bg2);font-size:.9rem;font-weight:500;transition:.2s">
+        <input type="checkbox" class="cb-${f.k}" value="${o}" onchange="onCbChange('${f.k}')" style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer">
+        <span>${o}</span>
+      </label>`).join("");
+    return `<div class="field" id="fldwrap_${f.k}"><label>${f.l} ${req}</label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px">${items}</div>
+      <input type="text" id="other_${f.k}" placeholder="اذكر النشاط الآخر..." style="display:none;margin-top:10px">
+    </div>`;
   }
   else if(f.t==="select"){
     input=`<select id="fld_${f.k}"><option value="">اختر...</option>`+
@@ -1192,6 +1254,13 @@ function fieldHTML(f){
   else input=`<input type="${f.t}" id="fld_${f.k}" placeholder="${f.l}">`;
   return `<div class="field"><label>${f.l} ${req}</label>${input}</div>`;
 }
+function onCbChange(k){
+  const cbs=document.querySelectorAll(".cb-"+k);
+  let hasOther=false;
+  cbs.forEach(cb=>{ if(cb.checked && cb.value==="أخرى") hasOther=true; });
+  const inp=document.getElementById("other_"+k);
+  if(inp) inp.style.display=hasOther?"block":"none";
+}
 function openForm(svcId){
   const s=SERVICES.find(x=>x.id===svcId); if(!s)return;
   STATE.editingId=svcId; STATE.currentFiles={};
@@ -1202,7 +1271,7 @@ function openForm(svcId){
   while(i<s.fields.length){
     const f=s.fields[i];
     const next=s.fields[i+1];
-    const pairable=(f.t!=="textarea"&&f.t!=="file"&&next&&next.t!=="textarea"&&next.t!=="file");
+    const pairable=(f.t!=="textarea"&&f.t!=="file"&&f.t!=="checkboxes"&&next&&next.t!=="textarea"&&next.t!=="file"&&next.t!=="checkboxes");
     if(pairable){
       html+=`<div class="field-row">${fieldHTML(f).replace('<div class="field">','<div class="field" style="margin-bottom:0">')}${fieldHTML(next).replace('<div class="field">','<div class="field" style="margin-bottom:0">')}</div><div style="height:18px"></div>`;
       i+=2;
@@ -1227,6 +1296,21 @@ function submitForm(){
   const data={}; let ok=true; let firstBad=null;
   for(const f of s.fields){
     if(f.t==="file")continue;
+    if(f.t==="checkboxes"){
+      // جمع الاختيارات المحددة
+      const cbs=document.querySelectorAll(".cb-"+f.k);
+      const selected=[];
+      cbs.forEach(cb=>{ if(cb.checked) selected.push(cb.value); });
+      // لو "أخرى" متضمنة، استبدلها بالنص اللي كتبه
+      const otherInp=document.getElementById("other_"+f.k);
+      if(selected.includes("أخرى") && otherInp && otherInp.value.trim()){
+        const idx=selected.indexOf("أخرى");
+        selected[idx]="أخرى: "+otherInp.value.trim();
+      }
+      if(f.req && selected.length===0){ ok=false; }
+      data[f.k]=selected.join("، ");
+      continue;
+    }
     const el=document.getElementById("fld_"+f.k);
     const v=el?el.value.trim():"";
     if(f.req&&!v){ ok=false; if(!firstBad)firstBad=el; if(el)el.style.borderColor="var(--red)"; }
@@ -1247,9 +1331,10 @@ function submitForm(){
     applicant:STATE.user, company:data.company||"",
     country:data.target_country||"-",
     amount:data.price_offer||"0",
-    currency:data.currency||"ريال سعودي",
+    currency:"ريال سعودي",
     status:DEFAULT_STATUS, note:"", date:new Date().toISOString().slice(0,10),
-    fields:data, fileName:fileNames
+    fields:data, fileName:fileNames,
+    completion:null  // للاستكمال لاحقاً
   };
   STATE.requests.unshift(req); saveRequests();
   pushToSheet(req);
@@ -1271,6 +1356,8 @@ function renderMyRequests(){
   if(!rows.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="ei">📭</div><p>لا توجد طلبات بعد</p></div></td></tr>`; return; }
   tbody.innerHTML=rows.map(r=>{
     const st=STATUS_MAP[r.status]||STATUS_MAP.submitted;
+    const canComplete=(r.status==="preliminary"&&!r.completion&&r.applicant===STATE.user);
+    const completeBtn=canComplete?` <button class="act-btn approve" onclick="openCompleteModal('${r.id}')">📤 استكمال</button>`:"";
     return `<tr>
       <td><b>${r.refNo}</b></td>
       <td>${r.serviceName}</td>
@@ -1278,7 +1365,7 @@ function renderMyRequests(){
       <td>${fmtMoney(r.amount)}</td>
       <td><span class="badge ${st.badge}">${st.label}</span></td>
       <td>${r.date}</td>
-      <td><button class="act-btn" onclick="viewDetail('${r.id}')">عرض</button> <button class="act-btn" onclick="printRequestReport('${r.id}')">📄 تقرير</button></td>
+      <td><button class="act-btn" onclick="viewDetail('${r.id}')">عرض</button>${completeBtn} <button class="act-btn" onclick="printRequestReport('${r.id}')">📄 تقرير</button></td>
     </tr>`;
   }).join("");
 }
@@ -1380,6 +1467,60 @@ function setStatus(id,status){
   renderAdminTable(); renderAdminKpis();
 }
 
+/* ===== استكمال الطلب (User Step 2) ===== */
+let _completeId=null;
+let _completeFile=null;
+function openCompleteModal(id){
+  const r=STATE.requests.find(x=>x.id===id); if(!r)return;
+  if(r.status!=="preliminary"){ toast("الطلب ليس في مرحلة الاستكمال","err"); return; }
+  _completeId=id; _completeFile=null;
+  document.getElementById("completeFileName").textContent="";
+  document.getElementById("completeComment").value="";
+  document.getElementById("completeFile").value="";
+  document.getElementById("completeSub").textContent=r.serviceName+" — "+r.refNo;
+  // إظهار ملاحظة المراجع لو موجودة
+  const noteBox=document.getElementById("completeNote");
+  if(r.note){
+    document.getElementById("completeReviewerNote").textContent=r.note;
+    noteBox.style.display="block";
+  } else { noteBox.style.display="none"; }
+  document.getElementById("completeOverlay").classList.add("show");
+}
+function closeCompleteModal(){
+  document.getElementById("completeOverlay").classList.remove("show");
+  _completeId=null; _completeFile=null;
+}
+function onCompleteFile(){
+  const inp=document.getElementById("completeFile");
+  if(inp.files&&inp.files[0]){
+    const f=inp.files[0];
+    document.getElementById("completeFileName").textContent="✓ "+f.name+" ("+(f.size/1024).toFixed(0)+" KB)";
+    const r=new FileReader();
+    r.onload=()=>{ _completeFile={name:f.name,type:f.type,data:r.result.split(",")[1]}; };
+    r.readAsDataURL(f);
+  }
+}
+function submitCompletion(){
+  if(!_completeId)return;
+  const r=STATE.requests.find(x=>x.id===_completeId); if(!r)return;
+  const comment=document.getElementById("completeComment").value.trim();
+  if(!comment && !_completeFile){
+    toast("الرجاء إضافة مستند أو تعليق","err"); return;
+  }
+  // حفظ بيانات الاستكمال + نقل لمرحلة "تحت الدراسة" تلقائياً
+  r.completion={
+    comment:comment,
+    fileName:_completeFile?_completeFile.name:"",
+    date:new Date().toISOString().slice(0,10),
+    by:STATE.user
+  };
+  r.status="review";  // تلقائياً ينتقل لتحت الدراسة
+  saveRequests(); updateSheetStatus(r);
+  closeCompleteModal();
+  toast("✓ تم إرسال الاستكمال بنجاح","ok");
+  renderMyRequests();
+}
+
 /* ============================================================
    تفاصيل الطلب (مودال)
    ============================================================ */
@@ -1401,7 +1542,14 @@ function viewDetail(id){
   if(r.currency) html+=`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:8px"><span style="color:var(--text-soft)">العملة</span><b>${r.currency}</b></div>`;
   const st=STATUS_MAP[r.status]||STATUS_MAP.submitted;
   html+=`<div style="display:flex;justify-content:space-between;padding-top:6px"><span style="color:var(--text-soft)">الحالة</span><span class="badge ${st.badge}">${st.label}</span></div>`;
-  if(r.note)html+=`<div style="background:var(--bg);padding:12px;border-radius:10px;margin-top:6px"><b>ملاحظة:</b> ${r.note}</div>`;
+  if(r.note)html+=`<div style="background:var(--bg);padding:12px;border-radius:10px;margin-top:6px"><b>ملاحظة المراجع:</b> ${r.note}</div>`;
+  if(r.completion){
+    html+=`<div style="background:var(--primary-light);padding:14px;border-radius:12px;margin-top:10px;border-right:4px solid var(--primary)">
+      <div style="font-weight:800;color:var(--primary);margin-bottom:6px">📤 الاستكمال (بتاريخ ${r.completion.date})</div>
+      ${r.completion.comment?`<div style="margin-bottom:6px"><b>التعليق:</b> ${r.completion.comment}</div>`:""}
+      ${r.completion.fileName?`<div><b>المرفق:</b> 📎 ${r.completion.fileName}</div>`:""}
+    </div>`;
+  }
   html+=`</div>`;
   // شريط تقدّم المراحل
   html+=stageTrackerHTML(r.status);
@@ -1462,9 +1610,89 @@ function closeDetail(){document.getElementById("detailOverlay").classList.remove
    ============================================================ */
 function renderReports(){
   renderReportKpis();
+  renderTimeChart();
   drawBarChart("chartByService",groupCount(r=>r.serviceName),"خدمة");
   drawBarChart("chartByStatus",groupCount(r=>(STATUS_MAP[r.status]||STATUS_MAP.submitted).label),"حالة");
   drawBarChart("chartByCountry",topCount(r=>r.country,8),"دولة");
+  drawBarChart("chartByCompany",groupCount(r=>(r.fields&&r.fields.company)||r.company||"-"),"شركة");
+}
+
+/* ===== منحنى الزمن (سنوي/شهري) ===== */
+function renderTimeChart(){
+  const mode=document.getElementById("timeChartMode").value||"year";
+  const el=document.getElementById("timeChart");
+  if(!STATE.requests.length){
+    el.innerHTML=`<div class="empty"><div class="ei">📈</div><p>لا توجد بيانات</p></div>`;
+    return;
+  }
+  // تجميع حسب السنة أو الشهر
+  const buckets={};
+  STATE.requests.forEach(r=>{
+    const d=r.date||"2024-01-01";
+    const key=mode==="year"?d.substring(0,4):d.substring(0,7);
+    if(!buckets[key]) buckets[key]={total:0,disbursed:0,amount:0};
+    buckets[key].total++;
+    if(r.status==="disbursed") buckets[key].disbursed++;
+    buckets[key].amount+=parseFloat(r.amount)||0;
+  });
+  const keys=Object.keys(buckets).sort();
+  if(!keys.length){ el.innerHTML='<div class="empty"><p>لا توجد بيانات</p></div>'; return; }
+  const maxVal=Math.max(...keys.map(k=>buckets[k].total));
+  // رسم SVG
+  const w=Math.max(600,keys.length*100);
+  const h=280, pad=40;
+  const cw=w-pad*2, ch=h-pad*2;
+  const xStep=keys.length>1?cw/(keys.length-1):0;
+  const points=keys.map((k,i)=>{
+    const x=pad+i*xStep;
+    const y=h-pad-(buckets[k].total/maxVal)*ch;
+    return {x,y,k,v:buckets[k].total,d:buckets[k].disbursed,a:buckets[k].amount};
+  });
+  // مسار المنحنى
+  const linePath=points.map((p,i)=>(i===0?"M":"L")+p.x+","+p.y).join(" ");
+  const areaPath=linePath+` L ${points[points.length-1].x},${h-pad} L ${points[0].x},${h-pad} Z`;
+  // نقاط المعتمد
+  const dPoints=points.map(p=>{
+    const y=h-pad-(p.d/maxVal)*ch;
+    return {x:p.x,y};
+  });
+  const dPath=dPoints.map((p,i)=>(i===0?"M":"L")+p.x+","+p.y).join(" ");
+  // خطوط y-axis
+  const ySteps=4;
+  let yLines="";
+  for(let i=0;i<=ySteps;i++){
+    const y=pad+(ch/ySteps)*i;
+    const val=Math.round(maxVal-(maxVal/ySteps)*i);
+    yLines+=`<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="var(--border)" stroke-width="1" opacity=".5"/>`;
+    yLines+=`<text x="${pad-8}" y="${y+4}" font-size="10" fill="var(--text-soft)" text-anchor="end">${val}</text>`;
+  }
+  el.innerHTML=`
+    <div style="overflow-x:auto">
+      <svg viewBox="0 0 ${w} ${h}" style="width:100%;min-width:${w}px;height:280px;display:block">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="var(--primary)" stop-opacity=".35"/>
+            <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        ${yLines}
+        <path d="${areaPath}" fill="url(#areaGrad)"/>
+        <path d="${linePath}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="${dPath}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-dasharray="5,4" stroke-linejoin="round" opacity=".85"/>
+        ${points.map((p,i)=>`
+          <g>
+            <circle cx="${p.x}" cy="${p.y}" r="6" fill="var(--card-solid)" stroke="var(--primary)" stroke-width="3"/>
+            <circle cx="${dPoints[i].x}" cy="${dPoints[i].y}" r="4" fill="var(--green)"/>
+            <text x="${p.x}" y="${h-pad+18}" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">${p.k}</text>
+            <text x="${p.x}" y="${p.y-12}" font-size="11" font-weight="800" fill="var(--primary)" text-anchor="middle">${p.v}</text>
+          </g>
+        `).join("")}
+      </svg>
+    </div>
+    <div style="display:flex;gap:18px;justify-content:center;margin-top:12px;font-size:.82rem;color:var(--text-soft);flex-wrap:wrap">
+      <span><span style="display:inline-block;width:14px;height:3px;background:var(--primary);vertical-align:middle;margin-left:6px"></span>إجمالي الطلبات</span>
+      <span><span style="display:inline-block;width:14px;height:3px;background:var(--green);border-top:1.5px dashed var(--green);vertical-align:middle;margin-left:6px"></span>المعتمدة (تم الصرف)</span>
+    </div>`;
 }
 function renderReportKpis(){
   const all=STATE.requests;
