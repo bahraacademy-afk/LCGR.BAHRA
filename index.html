@@ -16,7 +16,7 @@
   --red:#e2231a;            /* أحمر بحرة */
   --bg:#dcf0ed;
   --bg2:#eefaf8;
-  --card:rgba(255,255,255,.7);
+  --card:rgba(255,255,255,.45);
   --card-solid:#ffffff;
   --glass-border:rgba(255,255,255,.7);
   --text:#0a2a28;
@@ -26,12 +26,12 @@
   --shadow-hover:0 22px 50px rgba(13,148,136,.24), 0 8px 18px rgba(13,148,136,.13);
   --shadow-3d:0 1px 0 rgba(255,255,255,.6) inset, 0 20px 40px -12px rgba(13,148,136,.35);
   --radius:20px;
-  --sidebar:rgba(255,255,255,.68);
+  --sidebar:rgba(255,255,255,.45);
   --grad-primary:linear-gradient(135deg,#0d9488 0%,#2dd4bf 100%);
   --grad-accent:linear-gradient(135deg,#2dd4bf 0%,#0d9488 100%);
   --grad-green:linear-gradient(135deg,#16a34a 0%,#4ade80 100%);
   --grad-bg:radial-gradient(1200px 600px at 85% -5%, #a3e6dd 0%, transparent 55%), radial-gradient(1000px 700px at -10% 110%, #b0ece4 0%, transparent 50%), linear-gradient(160deg,#dcf0ed 0%,#eefaf8 100%);
-  --blur:16px;
+  --blur:24px;
 }
 [data-theme="dark"]{
   --primary:#2dd4bf;
@@ -43,7 +43,7 @@
   --green-soft:#0c2e1a;
   --bg:#04201d;
   --bg2:#072925;
-  --card:rgba(13,40,38,.62);
+  --card:rgba(13,40,38,.42);
   --card-solid:#0d2826;
   --glass-border:rgba(90,190,180,.18);
   --text:#dcf5f1;
@@ -52,12 +52,12 @@
   --shadow:0 8px 30px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
   --shadow-hover:0 22px 50px rgba(0,0,0,.6), 0 8px 18px rgba(0,0,0,.4);
   --shadow-3d:0 1px 0 rgba(90,190,180,.15) inset, 0 20px 40px -12px rgba(0,0,0,.7);
-  --sidebar:rgba(7,33,30,.7);
+  --sidebar:rgba(7,33,30,.45);
   --grad-primary:linear-gradient(135deg,#14b8a6 0%,#2dd4bf 100%);
   --grad-accent:linear-gradient(135deg,#2dd4bf 0%,#0a6e66 100%);
   --grad-green:linear-gradient(135deg,#16a34a 0%,#4ade80 100%);
   --grad-bg:radial-gradient(1200px 600px at 85% -5%, #0a3e38 0%, transparent 55%), radial-gradient(1000px 700px at -10% 110%, #07332e 0%, transparent 50%), linear-gradient(160deg,#04201d 0%,#072925 100%);
-  --blur:18px;
+  --blur:26px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -392,6 +392,62 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .empty{text-align:center;padding:50px 20px;color:var(--text-soft)}
 .empty .ei{font-size:3rem;opacity:.4}
 
+/* ====== AI: زر تقييم ذكي ====== */
+.ai-eval-box{background:linear-gradient(135deg,rgba(13,148,136,.08),rgba(45,212,191,.05));border:1px solid var(--glass-border);border-radius:16px;padding:18px;margin-top:16px;position:relative}
+.ai-eval-box .ai-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:700;color:var(--primary)}
+.ai-eval-box .ai-head .ai-badge{background:var(--grad-primary);color:#fff;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;display:flex;align-items:center;gap:4px}
+.ai-eval-body{font-size:.92rem;line-height:1.8;white-space:pre-wrap;color:var(--text)}
+.ai-eval-body b,.ai-eval-body strong{color:var(--primary);font-weight:800}
+.ai-loading{display:flex;align-items:center;gap:10px;color:var(--text-soft);padding:14px 0}
+.ai-loading .ai-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:aiPulse 1.2s infinite}
+.ai-loading .ai-dot:nth-child(2){animation-delay:.2s}
+.ai-loading .ai-dot:nth-child(3){animation-delay:.4s}
+@keyframes aiPulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* ====== AI: شات بوت عائم ====== */
+.ai-chat-fab{
+  position:fixed;bottom:30px;left:30px;width:62px;height:62px;border-radius:50%;
+  background:var(--grad-primary);color:#fff;border:none;cursor:pointer;
+  box-shadow:0 12px 28px rgba(13,148,136,.45);font-size:1.6rem;z-index:400;
+  display:flex;align-items:center;justify-content:center;transition:transform .3s;
+}
+.ai-chat-fab:hover{transform:scale(1.1) rotate(-8deg)}
+.ai-chat-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--accent);opacity:.5;animation:aiPing 2.2s infinite}
+@keyframes aiPing{0%{transform:scale(1);opacity:.7}80%,100%{transform:scale(1.4);opacity:0}}
+
+.ai-chat-panel{
+  position:fixed;bottom:104px;left:30px;width:380px;max-width:calc(100vw - 60px);height:520px;max-height:calc(100vh - 140px);
+  background:var(--card-solid);border:1px solid var(--glass-border);border-radius:22px;
+  box-shadow:0 30px 80px rgba(4,32,29,.35);display:none;flex-direction:column;z-index:401;
+  animation:modalPop .3s cubic-bezier(.2,.9,.3,1.2);overflow:hidden;
+}
+.ai-chat-panel.show{display:flex}
+.ai-chat-head{background:var(--grad-primary);color:#fff;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+.ai-chat-head .ai-title{display:flex;align-items:center;gap:10px;font-weight:800}
+.ai-chat-head .ai-title .ai-ic{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.ai-chat-head .ai-title .ai-sub{font-size:.72rem;opacity:.85;font-weight:500;margin-top:1px}
+.ai-chat-head button{background:rgba(255,255,255,.18);border:none;color:#fff;width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:1rem}
+.ai-chat-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--bg2)}
+.ai-msg{max-width:85%;padding:11px 14px;border-radius:16px;font-size:.9rem;line-height:1.6;white-space:pre-wrap}
+.ai-msg.user{align-self:flex-end;background:var(--grad-primary);color:#fff;border-bottom-left-radius:6px}
+.ai-msg.bot{align-self:flex-start;background:var(--card-solid);border:1px solid var(--border);border-bottom-right-radius:6px}
+.ai-msg.bot b,.ai-msg.bot strong{color:var(--primary)}
+.ai-chat-foot{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--card-solid)}
+.ai-chat-foot input{flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:14px;font-family:inherit;background:var(--bg2);color:var(--text);font-size:.9rem}
+.ai-chat-foot input:focus{outline:none;border-color:var(--primary)}
+.ai-chat-foot button{background:var(--grad-primary);color:#fff;border:none;width:46px;height:46px;border-radius:14px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:.2s}
+.ai-chat-foot button:hover{transform:scale(1.05)}
+.ai-chat-foot button:disabled{opacity:.5;cursor:not-allowed}
+.ai-welcome{text-align:center;color:var(--text-soft);padding:20px;font-size:.88rem}
+.ai-welcome .aw-ic{font-size:2.2rem;margin-bottom:8px}
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.ai-suggestions span{background:var(--primary-light);color:var(--primary);padding:6px 12px;border-radius:14px;font-size:.78rem;cursor:pointer;font-weight:600}
+.ai-suggestions span:hover{background:var(--primary);color:#fff}
+@media(max-width:600px){
+  .ai-chat-fab{bottom:90px;left:18px;width:54px;height:54px;font-size:1.4rem}
+  .ai-chat-panel{bottom:155px;left:18px;right:18px;width:auto}
+}
+
 /* ====== شعارات مزدوجة ====== */
 .splash-logos,.login-logos{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:8px}
 .splash-logos img{height:64px}
@@ -600,7 +656,9 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
           <p>تحليل شامل لأداء الطلبات والخدمات</p>
         </div>
         <button class="btn btn-primary" onclick="printFullReport()">📊 تصدير التقرير الشامل</button>
+        <button class="btn btn-ghost" onclick="aiReportSummary()" style="margin-right:8px">🤖 ملخص ذكي</button>
       </div>
+      <div id="aiSummaryContainer" style="display:none;margin-bottom:20px"></div>
       <div class="kpi-grid" id="reportKpis"></div>
       <div class="panel">
         <div class="panel-head"><h2>الطلبات حسب الخدمة</h2></div>
@@ -670,6 +728,36 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
       <button class="btn btn-red" onclick="confirmReject()">تأكيد الرفض</button>
       <button class="btn btn-ghost" onclick="closeRejectModal()">إلغاء</button>
     </div>
+  </div>
+</div>
+
+<!-- مساعد بحرة الذكي (Chatbot) -->
+<button class="ai-chat-fab" id="aiChatFab" onclick="toggleAiChat()" title="المساعد الذكي" style="display:none">🤖</button>
+<div class="ai-chat-panel" id="aiChatPanel">
+  <div class="ai-chat-head">
+    <div class="ai-title">
+      <div class="ai-ic">🤖</div>
+      <div>
+        <div>مساعد بحرة الذكي</div>
+        <div class="ai-sub">مدعوم بـ Gemini AI</div>
+      </div>
+    </div>
+    <button onclick="toggleAiChat()">✕</button>
+  </div>
+  <div class="ai-chat-body" id="aiChatBody">
+    <div class="ai-welcome">
+      <div class="aw-ic">👋</div>
+      أهلاً بك! اسألني عن أي شي يخص المنصة، الخدمات، أو طلباتك.
+      <div class="ai-suggestions">
+        <span onclick="askAiSuggested('ما هي خدمات دعم الحوافز المتوفرة؟')">الخدمات المتوفرة</span>
+        <span onclick="askAiSuggested('كيف أقدم طلب دعم للمشاركة في معرض دولي؟')">تقديم طلب معرض</span>
+        <span onclick="askAiSuggested('ما هي مراحل الطلب؟')">مراحل الطلب</span>
+      </div>
+    </div>
+  </div>
+  <div class="ai-chat-foot">
+    <input id="aiChatInput" placeholder="اكتب سؤالك..." onkeydown="if(event.key==='Enter')sendAiChat()">
+    <button id="aiChatSend" onclick="sendAiChat()" title="إرسال">➤</button>
   </div>
 </div>
 
@@ -1005,6 +1093,8 @@ function logout(){
   // إغلاق أي مودالات مفتوحة
   document.getElementById("formOverlay").classList.remove("show");
   document.getElementById("detailOverlay").classList.remove("show");
+  document.getElementById("aiChatFab").style.display="none";
+  document.getElementById("aiChatPanel").classList.remove("show");
   showLogin();
   toast("تم تسجيل الخروج بنجاح","ok");
 }
@@ -1019,6 +1109,8 @@ function enterApp(){
   const isAdmin=STATE.role==="admin"||STATE.role==="reviewer";
   document.querySelectorAll(".admin-only").forEach(e=>e.style.display=isAdmin?"":"none");
   document.getElementById("adminLabel").style.display=isAdmin?"":"none";
+  // إظهار زر المساعد الذكي
+  document.getElementById("aiChatFab").style.display="flex";
   renderServices(); renderHome(); nav("home");
 }
 
@@ -1313,6 +1405,10 @@ function viewDetail(id){
   html+=`</div>`;
   // شريط تقدّم المراحل
   html+=stageTrackerHTML(r.status);
+  // زر تقييم AI (للأدمن والمراجع فقط)
+  if(STATE.role==="admin"||STATE.role==="reviewer"){
+    html+=`<div style="margin-top:18px"><button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="aiEvaluate('${r.id}')">🤖 احصل على تقييم ذكي للطلب</button><div id="aiEvalContainer" style="display:none;margin-top:14px"></div></div>`;
+  }
   document.getElementById("detailBody").innerHTML=html;
   // أزرار الأدمن
   const foot=document.getElementById("detailFoot");
@@ -1325,6 +1421,7 @@ function viewDetail(id){
     if(r.status!=="disbursed"&&r.status!=="rejected"){
       btns+=`<button class="btn btn-red" onclick="closeDetail();rejectRequest('${r.id}')">✕ رفض</button>`;
     }
+    btns+=`<button class="btn btn-ghost" onclick="aiEvaluate('${r.id}')">🤖 تقييم ذكي</button>`;
     btns+=`<button class="btn btn-ghost" onclick="printRequestReport('${r.id}')">📄 تقرير</button>`;
     btns+=`<button class="btn btn-ghost" onclick="closeDetail()">إغلاق</button>`;
     foot.innerHTML=btns;
@@ -1433,8 +1530,312 @@ function toast(msg,type){
 }
 
 /* ============================================================
+   🤖 الذكاء الاصطناعي (Gemini AI)
+   ============================================================ */
+function aiFormatText(text){
+  // تنسيق بسيط: تحويل **نص** إلى <b>نص</b>
+  return (text||"").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+}
+
+// ----- 1) تقييم الطلب -----
+function aiEvaluate(reqId){
+  const r=STATE.requests.find(x=>x.id===reqId); if(!r)return;
+  const container=document.getElementById("aiEvalContainer");
+  if(!container)return;
+  container.style.display="block";
+  container.innerHTML=`
+    <div class="ai-eval-box">
+      <div class="ai-head"><span class="ai-badge">🤖 AI</span> تقييم الطلب الذكي</div>
+      <div class="ai-loading"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span>جاري التحليل...</div>
+    </div>`;
+  if(SHEET_API.includes("PUT_YOUR")){
+    container.querySelector(".ai-eval-box").innerHTML=`
+      <div class="ai-head"><span class="ai-badge">🤖 AI</span> تقييم الطلب الذكي</div>
+      <div class="ai-eval-body" style="color:var(--text-soft)">⚠️ ميزة AI تعمل فقط بعد ربط الشيت وتفعيل مفتاح Gemini API.</div>`;
+    return;
+  }
+  jsonp("ai",{mode:"evaluate",request:r},(res)=>{
+    const box=container.querySelector(".ai-eval-box");
+    if(res&&res.ok&&res.text){
+      box.innerHTML=`
+        <div class="ai-head"><span class="ai-badge">🤖 AI</span> تقييم الطلب الذكي</div>
+        <div class="ai-eval-body">${aiFormatText(res.text)}</div>`;
+    } else {
+      box.innerHTML=`
+        <div class="ai-head"><span class="ai-badge">🤖 AI</span> تقييم الطلب الذكي</div>
+        <div class="ai-eval-body" style="color:var(--red)">⚠️ ${(res&&res.error)||"تعذّر الحصول على التقييم"}</div>`;
+    }
+  });
+}
+
+// ----- 2) المساعد الذكي (Chatbot) -----
+function toggleAiChat(){
+  const p=document.getElementById("aiChatPanel");
+  p.classList.toggle("show");
+  if(p.classList.contains("show")) setTimeout(()=>document.getElementById("aiChatInput").focus(),300);
+}
+function askAiSuggested(q){
+  document.getElementById("aiChatInput").value=q;
+  sendAiChat();
+}
+function appendAiMsg(text,type){
+  const body=document.getElementById("aiChatBody");
+  // إزالة الترحيب لو موجود
+  const w=body.querySelector(".ai-welcome");
+  if(w)w.remove();
+  const div=document.createElement("div");
+  div.className="ai-msg "+type;
+  div.innerHTML=type==="bot"?aiFormatText(text):text;
+  body.appendChild(div);
+  body.scrollTop=body.scrollHeight;
+  return div;
+}
+function sendAiChat(){
+  const inp=document.getElementById("aiChatInput");
+  const q=inp.value.trim(); if(!q)return;
+  inp.value="";
+  appendAiMsg(q,"user");
+  const sendBtn=document.getElementById("aiChatSend");
+  sendBtn.disabled=true;
+  const loading=appendAiMsg("جاري التفكير...","bot");
+  if(SHEET_API.includes("PUT_YOUR")){
+    loading.innerHTML="⚠️ المساعد الذكي يحتاج ربط الشيت وتفعيل مفتاح Gemini.<br>المنصة تعمل بشكل طبيعي بدونه.";
+    sendBtn.disabled=false; return;
+  }
+  // سياق: عدد طلبات المستخدم الحالي
+  const myCount=STATE.requests.filter(r=>r.applicant===STATE.user).length;
+  const ctx=`المستخدم الحالي: ${STATE.user} (${STATE.role}). لديه ${myCount} طلبات في المنصة.`;
+  jsonp("ai",{mode:"chat",question:q,context:ctx},(res)=>{
+    sendBtn.disabled=false;
+    if(res&&res.ok&&res.text){
+      loading.innerHTML=aiFormatText(res.text);
+    } else {
+      loading.innerHTML=`<span style="color:var(--red)">⚠️ ${(res&&res.error)||"تعذّر الحصول على إجابة"}</span>`;
+    }
+    document.getElementById("aiChatBody").scrollTop=document.getElementById("aiChatBody").scrollHeight;
+  });
+}
+
+// ----- 3) ملخص ذكي للتقارير -----
+function aiReportSummary(){
+  const container=document.getElementById("aiSummaryContainer");
+  if(!container)return;
+  container.style.display="block";
+  container.innerHTML=`
+    <div class="ai-eval-box">
+      <div class="ai-head"><span class="ai-badge">🤖 AI</span> الملخص التنفيذي الذكي</div>
+      <div class="ai-loading"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span>جاري إعداد التحليل...</div>
+    </div>`;
+  if(SHEET_API.includes("PUT_YOUR")){
+    container.querySelector(".ai-eval-box").innerHTML=`
+      <div class="ai-head"><span class="ai-badge">🤖 AI</span> الملخص التنفيذي الذكي</div>
+      <div class="ai-eval-body" style="color:var(--text-soft)">⚠️ هذي الميزة تعمل بعد ربط الشيت وتفعيل مفتاح Gemini API.</div>`;
+    return;
+  }
+  // جمع الإحصائيات
+  const all=STATE.requests;
+  const approvedList=all.filter(r=>r.status==="disbursed");
+  const pendingList=all.filter(r=>r.status==="submitted"||r.status==="preliminary"||r.status==="review");
+  const totalAmount=all.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  const approvedAmount=approvedList.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  const byService={}; all.forEach(r=>{byService[r.serviceName]=(byService[r.serviceName]||0)+1;});
+  const byCountry={}; all.forEach(r=>{const c=r.country||'-';byCountry[c]=(byCountry[c]||0)+1;});
+  const topService=Object.entries(byService).sort((a,b)=>b[1]-a[1])[0];
+  const topCountry=Object.entries(byCountry).sort((a,b)=>b[1]-a[1])[0];
+  const stats={
+    total:all.length,
+    approved:approvedList.length,
+    pending:pendingList.length,
+    rejected:all.filter(r=>r.status==="rejected").length,
+    rate:all.length?Math.round(approvedList.length/all.length*100):0,
+    totalAmount:Math.round(totalAmount),
+    approvedAmount:Math.round(approvedAmount),
+    countries:Object.keys(byCountry).length,
+    topService:topService?topService[0]:"-",
+    topCountry:topCountry?topCountry[0]:"-"
+  };
+  jsonp("ai",{mode:"summary",stats:stats},(res)=>{
+    const box=container.querySelector(".ai-eval-box");
+    if(res&&res.ok&&res.text){
+      box.innerHTML=`
+        <div class="ai-head"><span class="ai-badge">🤖 AI</span> الملخص التنفيذي الذكي</div>
+        <div class="ai-eval-body">${aiFormatText(res.text)}</div>`;
+    } else {
+      box.innerHTML=`
+        <div class="ai-head"><span class="ai-badge">🤖 AI</span> الملخص التنفيذي الذكي</div>
+        <div class="ai-eval-body" style="color:var(--red)">⚠️ ${(res&&res.error)||"تعذّر الحصول على الملخص"}</div>`;
+    }
+  });
+}
+
+/* ============================================================
    التقارير القابلة للطباعة
    ============================================================ */
+/* ============================================================
+   ميزات الذكاء الاصطناعي
+   ============================================================ */
+function aiEvaluate(id){
+  const r=STATE.requests.find(x=>x.id===id); if(!r)return;
+  openAiModal("🤖 تقييم ذكي للطلب","جاري التحليل بالذكاء الاصطناعي...");
+  aiCall("evaluate",{request:r},(res)=>{
+    if(!res||!res.ok){
+      setAiModalContent(`<div style="color:var(--red);text-align:center;padding:20px">${(res&&res.error)||"تعذّر الاتصال بخدمة الذكاء الاصطناعي"}</div>`);
+      return;
+    }
+    const ev=res.result||{};
+    const recMap={accept:{label:"موصى بالقبول",color:"var(--green)",ic:"✅"},needs_info:{label:"يحتاج معلومات إضافية",color:"var(--amber,#d97706)",ic:"⚠️"},reject:{label:"غير موصى به",color:"var(--red)",ic:"❌"}};
+    const rec=recMap[ev.recommendation]||recMap.needs_info;
+    const score=ev.score||0;
+    const sCol=score>=75?"var(--green)":score>=50?"#d97706":"var(--red)";
+    let html=`<div style="text-align:center;margin-bottom:24px">
+      <div style="display:inline-block;position:relative">
+        <div style="width:120px;height:120px;border-radius:50%;background:conic-gradient(${sCol} ${score*3.6}deg, var(--bg) 0deg);display:flex;align-items:center;justify-content:center">
+          <div style="width:96px;height:96px;border-radius:50%;background:var(--card-solid);display:flex;align-items:center;justify-content:center;flex-direction:column">
+            <div style="font-size:2rem;font-weight:800;color:${sCol}">${score}</div>
+            <div style="font-size:.7rem;color:var(--text-soft)">من 100</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:1.1rem;font-weight:700;color:${rec.color}">${rec.ic} ${rec.label}</div>
+    </div>`;
+    if(ev.summary)html+=`<div style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:16px;border-right:3px solid var(--primary)"><b>الملخص:</b> ${ev.summary}</div>`;
+    if(ev.strengths&&ev.strengths.length){
+      html+=`<div style="margin-bottom:14px"><div style="font-weight:700;color:var(--green);margin-bottom:8px">✓ نقاط القوة</div>`;
+      html+=ev.strengths.map(s=>`<div style="padding:6px 0;color:var(--text-soft)">• ${s}</div>`).join("");
+      html+=`</div>`;
+    }
+    if(ev.concerns&&ev.concerns.length){
+      html+=`<div style="margin-bottom:14px"><div style="font-weight:700;color:var(--red);margin-bottom:8px">⚠ ملاحظات</div>`;
+      html+=ev.concerns.map(s=>`<div style="padding:6px 0;color:var(--text-soft)">• ${s}</div>`).join("");
+      html+=`</div>`;
+    }
+    html+=`<div style="font-size:.75rem;color:var(--text-soft);text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🤖 تم التحليل بواسطة Gemini AI — التوصية استرشادية وللمراجع القرار النهائي</div>`;
+    setAiModalContent(html);
+  });
+}
+
+/* مودال AI عام */
+function openAiModal(title,initialContent){
+  let ov=document.getElementById("aiOverlay");
+  if(!ov){
+    ov=document.createElement("div");
+    ov.id="aiOverlay"; ov.className="overlay";
+    ov.innerHTML=`<div class="modal" style="max-width:560px">
+      <div class="modal-head">
+        <div class="ti"><h2 id="aiTitle"></h2></div>
+        <button class="close-x" onclick="closeAiModal()">✕</button>
+      </div>
+      <div class="modal-body" id="aiBody"></div>
+    </div>`;
+    document.body.appendChild(ov);
+  }
+  document.getElementById("aiTitle").textContent=title;
+  setAiModalContent(initialContent||`<div style="text-align:center;padding:30px"><div class="loader" style="margin:0 auto;border-top-color:var(--primary);border-color:var(--border)"></div><div style="margin-top:16px;color:var(--text-soft)">${initialContent||"جاري المعالجة..."}</div></div>`);
+  ov.classList.add("show");
+}
+function setAiModalContent(html){
+  const b=document.getElementById("aiBody"); if(b)b.innerHTML=html;
+}
+function closeAiModal(){
+  const ov=document.getElementById("aiOverlay"); if(ov)ov.classList.remove("show");
+}
+
+/* ملخص ذكي للتقارير */
+function aiReportSummary(){
+  const all=STATE.requests;
+  if(!all.length){ toast("لا توجد بيانات للتحليل","err"); return; }
+  const approved=all.filter(r=>r.status==="disbursed");
+  const pending=all.filter(r=>r.status==="submitted"||r.status==="preliminary"||r.status==="review").length;
+  const rejected=all.filter(r=>r.status==="rejected").length;
+  const total=all.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  const approvedAmt=approved.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  const byService={}; all.forEach(r=>{byService[r.serviceName]=(byService[r.serviceName]||0)+1;});
+  const byCountry={}; all.forEach(r=>{byCountry[r.country||'-']=(byCountry[r.country||'-']||0)+1;});
+  const topService=Object.entries(byService).sort((a,b)=>b[1]-a[1])[0];
+  const topCountry=Object.entries(byCountry).sort((a,b)=>b[1]-a[1])[0];
+  const stats={
+    total:all.length, approved:approved.length, pending, rejected,
+    totalAmount: total.toLocaleString("en-US"),
+    approvedAmount: approvedAmt.toLocaleString("en-US"),
+    rate: all.length?Math.round(approved.length/all.length*100):0,
+    topService: topService?topService[0]+" ("+topService[1]+" طلب)":'-',
+    topCountry: topCountry?topCountry[0]+" ("+topCountry[1]+" طلب)":'-'
+  };
+  openAiModal("✨ تحليل ذكي للتقارير","جاري إنشاء الملخص الذكي...");
+  aiCall("summary",{stats:stats},(res)=>{
+    if(!res||!res.ok){
+      setAiModalContent(`<div style="color:var(--red);text-align:center;padding:20px">${(res&&res.error)||"تعذّر الاتصال"}</div>`);
+      return;
+    }
+    const txt=(res.result||"").replace(/\n/g,"<br>");
+    setAiModalContent(`<div style="line-height:1.9;font-size:.98rem">${txt}</div>
+      <div style="font-size:.75rem;color:var(--text-soft);text-align:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">🤖 تم التحليل بواسطة Gemini AI</div>`);
+  });
+}
+
+/* مساعد دردشة */
+let CHAT_HISTORY=[];
+function toggleChatbot(){
+  let ov=document.getElementById("chatOverlay");
+  if(!ov){
+    ov=document.createElement("div");
+    ov.id="chatOverlay";
+    ov.style.cssText="position:fixed;bottom:96px;left:24px;width:380px;max-width:calc(100vw - 32px);height:520px;max-height:calc(100vh - 130px);background:var(--card-solid);border:1px solid var(--glass-border);border-radius:20px;box-shadow:0 30px 80px rgba(4,32,29,.3);z-index:400;display:none;flex-direction:column;overflow:hidden";
+    ov.innerHTML=`
+      <div style="padding:16px 18px;background:var(--grad-primary);color:#fff;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">🤖</span><div><div style="font-weight:800">المساعد الذكي</div><div style="font-size:.74rem;opacity:.85">مدعوم بـ Gemini AI</div></div></div>
+        <button onclick="toggleChatbot()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+      </div>
+      <div id="chatMessages" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px"></div>
+      <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px">
+        <input id="chatInput" placeholder="اكتب سؤالك..." style="flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-family:inherit" onkeydown="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()" style="background:var(--grad-primary);color:#fff;border:none;border-radius:12px;padding:0 16px;cursor:pointer;font-weight:700">إرسال</button>
+      </div>`;
+    document.body.appendChild(ov);
+    setTimeout(()=>{
+      addChatMessage("ai","مرحباً 👋 أنا مساعدك الذكي. تقدر تسألني عن طلباتك، الخدمات المتاحة، أو أي شي يخص المنصة.");
+    },100);
+  }
+  ov.style.display = ov.style.display==="flex" ? "none" : "flex";
+}
+function addChatMessage(sender,text){
+  const c=document.getElementById("chatMessages"); if(!c)return;
+  const isUser=sender==="user";
+  const bubble=document.createElement("div");
+  bubble.style.cssText="max-width:85%;padding:10px 14px;border-radius:16px;font-size:.9rem;line-height:1.6;animation:fadeUp .3s;"+(isUser?"background:var(--grad-primary);color:#fff;align-self:flex-start;border-bottom-right-radius:4px":"background:var(--bg);color:var(--text);align-self:flex-end;border-bottom-left-radius:4px");
+  bubble.innerHTML=text.replace(/\n/g,"<br>");
+  c.appendChild(bubble);
+  c.scrollTop=c.scrollHeight;
+}
+function sendChat(){
+  const inp=document.getElementById("chatInput");
+  const q=inp.value.trim(); if(!q)return;
+  addChatMessage("user",q);
+  CHAT_HISTORY.push({role:"user",text:q});
+  inp.value=""; inp.disabled=true;
+  const typing=document.createElement("div");
+  typing.id="chatTyping";
+  typing.style.cssText="background:var(--bg);color:var(--text-soft);align-self:flex-end;padding:10px 14px;border-radius:16px;font-size:.85rem";
+  typing.textContent="يكتب...";
+  document.getElementById("chatMessages").appendChild(typing);
+  // إعداد سياق مختصر
+  const ctx={
+    role:STATE.role, user:STATE.user,
+    myRequests:STATE.requests.filter(r=>r.applicant===STATE.user).slice(0,5).map(r=>({ref:r.refNo,service:r.serviceName,status:r.status,amount:r.amount})),
+    totalRequests:STATE.requests.length
+  };
+  aiCall("chat",{question:q,context:ctx},(res)=>{
+    document.getElementById("chatTyping")&&document.getElementById("chatTyping").remove();
+    inp.disabled=false; inp.focus();
+    if(!res||!res.ok){
+      addChatMessage("ai","⚠️ "+(res&&res.error||"تعذّر الاتصال. حاول مرة ثانية."));
+      return;
+    }
+    addChatMessage("ai",res.result||"-");
+    CHAT_HISTORY.push({role:"ai",text:res.result});
+  });
+}
+
 function printRequestReport(id){
   const r=STATE.requests.find(x=>x.id===id); if(!r)return;
   const s=SERVICES.find(x=>x.id===r.serviceId);
@@ -1578,6 +1979,10 @@ function jsonp(action,payload,cb){
   s.src=SHEET_API+"?"+params.toString();
   s.onerror=()=>{ if(cb)cb({ok:false,error:"network"}); };
   document.body.appendChild(s);
+}
+/* استدعاء الذكاء الاصطناعي */
+function aiCall(task, data, cb){
+  jsonp("ai", Object.assign({task:task}, data), cb);
 }
 function pushToSheet(req){
   jsonp("add",req,(res)=>{ if(res&&res.ok)console.log("saved to sheet"); });
