@@ -1564,7 +1564,17 @@ const I18N = {
   "تقديم الدعم اللغوي":"Language Support",
   "دعم تخصيص المنتجات والخدمات":"Product & Service Customization Support",
   "توفير التدريب المتخصص":"Specialized Training",
-  "التسويق والإعلان":"Marketing & Advertising"
+  "التسويق والإعلان":"Marketing & Advertising",
+  "تعويض المستفيد في تأمين الفرص التجارية الجديدة من خلال تغطية جزء من الرسوم ذات الصلة بالتعامل مع المشترين الدوليين.":"Compensates the beneficiary in securing new business opportunities by covering part of the related fees for dealing with international buyers.",
+  "تعويض المستفيد في تجنب الرسوم ذات الصلة بفهم المتطلبات أو حجم الطلب في الأسواق الجديدة وإعداد استراتيجيات الدخول إلى السوق/النمو.":"Compensates the beneficiary in avoiding fees related to understanding requirements or demand size in new markets and preparing market entry/growth strategies.",
+  "تعويض المستفيد في تحديد الفرص التجارية الجديدة من خلال حضور المعارض الدولية والتجارية التي يختارها.":"Compensates the beneficiary in identifying new business opportunities by attending international and trade exhibitions of their choice.",
+  "تعويض المستفيد في فهم المتطلبات القانونية ذات الصلة بالصادرات وبالأسواق الجديدة ومعالجتها.":"Compensates the beneficiary in understanding and addressing legal requirements related to exports and new markets.",
+  "تعويض المستفيد في تسجيل منتجاته أو خدماته وتسويقها على منصات التجارة الإلكترونية.":"Compensates the beneficiary in registering and marketing their products or services on e-commerce platforms.",
+  "تعويض المستفيد في تسجيل منتجاته في الأسواق الدولية لتمكينه من الدخول إلى السوق وتحقيق المبيعات فيه.":"Compensates the beneficiary in registering their products in international markets to enable market entry and achieve sales.",
+  "تعويض المستفيد في تجاوز الحواجز اللغوية ذات الصلة بالفرص الخارجية الجديدة.":"Compensates the beneficiary in overcoming language barriers related to new external opportunities.",
+  "تعويض المستفيد في تجنب الرسوم ذات الصلة بتخصيص منتجاته وخدماته للمواءمة مع متطلبات السوق الأجنبية أو احتياجاتها.":"Compensates the beneficiary in avoiding fees related to customizing their products and services to align with foreign market requirements or needs.",
+  "تقديم الدعم للمستفيدين في صقل مهارات موظفيهم في بعض مجالات التصدير من خلال الدورات التدريبية والشهادات.":"Provides support to beneficiaries in refining their employees' skills in certain export areas through training courses and certifications.",
+  "تعويض المستفيد في تسويق منتجاته أو خدماته دولياً.":"Compensates the beneficiary in marketing their products or services internationally."
 };
 
 
@@ -1654,10 +1664,12 @@ function svcCardHTML(s){
 }
 function renderServices(){
   document.getElementById("allServices").innerHTML=SERVICES.map(svcCardHTML).join("");
+  if(STATE.lang==="en") setTimeout(applyTranslation,0);
 }
 function renderHome(){
   document.getElementById("homeServices").innerHTML=SERVICES.slice(0,6).map(svcCardHTML).join("");
   renderHomeKpis();
+  if(STATE.lang==="en") setTimeout(applyTranslation,0);
 }
 
 /* ============================================================
