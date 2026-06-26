@@ -1342,6 +1342,7 @@ function nav(page){
   if(page==="reports")renderReports();
   if(window.innerWidth<=900)document.getElementById("sidebar").classList.remove("open");
   window.scrollTo(0,0);
+  if(STATE.lang==="en") applyTranslation();
 }
 function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");}
 
@@ -1355,11 +1356,279 @@ function applyTheme(t){
   setLS("ed_theme",t);
 }
 function toggleTheme(){applyTheme(STATE.theme==="dark"?"light":"dark");}
+
+/* ============ نظام الترجمة الكامل ============ */
+/* ============ قاموس الترجمة عربي ↔ إنجليزي ============ */
+const I18N = {
+  // الشريط العلوي والهوية
+  "منصة خدمات الصادرات | بحرة":"Export Services Platform | Bahra",
+  "منصة خدمات دعم الحوافز":"Incentives Support Services Platform",
+  "شركة حلول للمحولات والقضبان الكهربائية":"Solutions for Transformers & Busways",
+  "منصة خدمات":"Services Platform",
+  "دعم الحوافز":"Incentives Support",
+  "دعم":"Support",
+  "الحوافز":"Incentives",
+  "10 خدمات متكاملة لدعم التصدير":"10 integrated services to support exports",
+  "متابعة فورية لحالة طلباتك":"Real-time tracking of your requests",
+  "تقارير ومؤشرات أداء شاملة":"Comprehensive reports & KPIs",
+  "© مجموعة بحرة للكهرباء":"© Bahra Electric Group",
+
+  // تسجيل الدخول
+  "تسجيل الدخول":"Login",
+  "أدخل بياناتك للوصول إلى المنصة":"Enter your credentials to access the platform",
+  "اسم المستخدم":"Username",
+  "كلمة المرور":"Password",
+  "دخول →":"Login →",
+  "أدخل بيانات حسابك المسجّل في المنصة.":"Enter your registered account credentials.",
+
+  // الأدوار والتنقل
+  "مستخدم":"User",
+  "مقدم طلب":"Applicant",
+  "طلباتي":"My Requests",
+  "تبديل الوضع":"Toggle Theme",
+  "تسجيل الخروج":"Logout",
+  "القائمة":"Menu",
+  "الرئيسية":"Home",
+  "الخدمات":"Services",
+  "إدارة":"Management",
+  "لوحة الأدمن":"Admin Panel",
+  "التقارير و KPI":"Reports & KPI",
+  "مرحباً بك 👋":"Welcome 👋",
+  "الخدمات السريعة":"Quick Services",
+  "‹ الخدمات":"‹ Services",
+  "خدمات دعم الحوافز":"Incentives Support Services",
+  "اختر الخدمة المطلوبة لبدء تقديم الطلب":"Select a service to start your request",
+  "‹ طلباتي":"‹ My Requests",
+  "متابعة حالة الطلبات المقدمة":"Track your submitted requests",
+  "سجل الطلبات":"Requests Log",
+  "‹ لوحة الأدمن":"‹ Admin Panel",
+  "إدارة الطلبات":"Requests Management",
+  "مراجعة واعتماد الطلبات المقدمة":"Review & approve submitted requests",
+  "🖥️ وضع العرض":"🖥️ Display Mode",
+  "جميع الطلبات":"All Requests",
+  "كل الحالات":"All Statuses",
+
+  // الحالات (مختصرة في الفلاتر)
+  "تم الإرسال للموافقة":"Submitted for Approval",
+  "قبول مبدئي":"Preliminary Acceptance",
+  "تحت الدراسة":"Under Review",
+  "تم الصرف":"Disbursed",
+  "مرفوض":"Rejected",
+
+  // الحالات الرسمية الكاملة
+  "تم إرسال الطلب للصادرات لأخذ الموافقة":"Request submitted to Exports for approval",
+  "قبول مبدئي - بانتظار استكمال متطلبات الصرف":"Preliminary acceptance - awaiting disbursement requirements",
+  "طلب الصرف تحت الدراسة":"Disbursement request under review",
+  "تم صرف طلب الحافز":"Incentive disbursed",
+
+  // التقارير
+  "‹ التقارير":"‹ Reports",
+  "التقارير ومؤشرات الأداء":"Reports & Performance Indicators",
+  "تحليل شامل لأداء الطلبات والخدمات":"Comprehensive analysis of requests & services",
+  "📊 تصدير التقرير الشامل":"📊 Export Full Report",
+  "🤖 ملخص ذكي":"🤖 Smart Summary",
+  "📈 منحنى الطلبات عبر الزمن":"📈 Requests Trend Over Time",
+  "شهري":"Monthly",
+  "سنوي":"Yearly",
+  "الطلبات حسب الخدمة":"Requests by Service",
+  "الطلبات حسب الحالة":"Requests by Status",
+  "أعلى الدول حسب عدد الطلبات":"Top Countries by Requests",
+  "الطلبات حسب الشركة":"Requests by Company",
+  "تقارير":"Reports",
+
+  // النماذج والأزرار
+  "عنوان الخدمة":"Service Title",
+  "وصف":"Description",
+  "إرسال الطلب":"Submit Request",
+  "إلغاء":"Cancel",
+  "تفاصيل الطلب":"Request Details",
+  "رفض الطلب":"Reject Request",
+  "اكتب سبب الرفض (اختياري)":"Enter rejection reason (optional)",
+  "سبب الرفض":"Rejection Reason",
+  "تأكيد الرفض":"Confirm Rejection",
+  "📤 رفع الطلب للوزارة":"📤 Submit to Ministry",
+  "أدخل رقم الطلب الصادر من الوزارة":"Enter the ministry-issued request number",
+  "المرجع الداخلي للمنصة:":"Internal Platform Reference:",
+  "رقم طلب الوزارة":"Ministry Request Number",
+  "✓ تأكيد الرفع للوزارة":"✓ Confirm Submission to Ministry",
+  "استكمال متطلبات الطلب":"Complete Request Requirements",
+  "رفع المستندات المطلوبة وإضافة تعليق":"Upload required documents & add a comment",
+  "ملاحظة المراجع:":"Reviewer Note:",
+  "المستندات الإضافية":"Additional Documents",
+  "اضغط لرفع ملف (PDF, DOCX, PNG, JPG)":"Click to upload (PDF, DOCX, PNG, JPG)",
+  "تعليقك على الاستكمال":"Your completion comment",
+  "📤 إرسال الاستكمال":"📤 Submit Completion",
+
+  // المساعد الذكي
+  "مساعد بحرة الذكي":"Bahra Smart Assistant",
+  "مدعوم بـ Groq AI":"Powered by Groq AI",
+  "الخدمات المتوفرة":"Available Services",
+  "تقديم طلب معرض":"Submit Exhibition Request",
+  "مراحل الطلب":"Request Stages",
+  "المساعد الذكي":"Smart Assistant",
+  "إرسال":"Send",
+  "🤖 احصل على تقييم ذكي للطلب":"🤖 Get Smart Evaluation",
+  "🤖 تقييم ذكي":"🤖 Smart Evaluation",
+  "تقييم الطلب الذكي":"Smart Request Evaluation",
+  "جاري التحليل...":"Analyzing...",
+  "الملخص التنفيذي الذكي":"Smart Executive Summary",
+  "جاري إعداد التحليل...":"Preparing analysis...",
+  "من 100":"out of 100",
+  "الملخص:":"Summary:",
+  "✓ نقاط القوة":"✓ Strengths",
+  "⚠ ملاحظات":"⚠ Concerns",
+  "🤖 تم التحليل بواسطة Groq AI":"🤖 Analyzed by Groq AI",
+
+  // لوحة العرض
+  "لوحة عرض حوافز الصادرات":"Export Incentives Display Board",
+  "مباشر — يتحدّث تلقائياً":"Live — auto-updating",
+  "📈 الطلبات والمصروفات عبر السنوات":"📈 Requests & Disbursements Over Years",
+  "📋 توزيع الحالات":"📋 Status Distribution",
+  "🏢 حسب الشركة":"🏢 By Company",
+  "📂 حسب نوع الحافز":"📂 By Incentive Type",
+  "🌍 أعلى الدول":"🌍 Top Countries",
+
+  // الجداول والحقول
+  "بدء الخدمة":"Start Service",
+  "اختر...":"Select...",
+  "رقم الطلب":"Request No.",
+  "الخدمة":"Service",
+  "الدولة":"Country",
+  "المبلغ":"Amount",
+  "الحالة":"Status",
+  "التاريخ":"Date",
+  "إجراء":"Action",
+  "لا توجد طلبات بعد":"No requests yet",
+  "📤 استكمال":"📤 Complete",
+  "عرض":"View",
+  "📄 تقرير":"📄 Report",
+  "مقدم الطلب":"Applicant",
+  "الإجراءات":"Actions",
+  "لا توجد طلبات":"No requests",
+  "رفض":"Reject",
+  "المرفقات":"Attachments",
+  "العملة":"Currency",
+  "التعليق:":"Comment:",
+  "المرفق:":"Attachment:",
+  "✕ رفض":"✕ Reject",
+  "إغلاق":"Close",
+  "❌ تم رفض هذا الطلب":"❌ This request was rejected",
+  "مسار الطلب":"Request Path",
+  "لا توجد بيانات":"No data",
+
+  // الإحصائيات
+  "إجمالي الطلبات":"Total Requests",
+  "المعتمدة (تم الصرف)":"Approved (Disbursed)",
+  "المصروفة":"Disbursed",
+  "تقرير طلب حافز":"Incentive Request Report",
+  "تاريخ التقديم":"Submission Date",
+  "ملاحظة:":"Note:",
+  "🖨️ طباعة / حفظ PDF":"🖨️ Print / Save PDF",
+  "التقرير الشامل":"Full Report",
+  "معتمدة":"Approved",
+  "قيد المراجعة":"Under Review",
+  "مرفوضة":"Rejected",
+  "إجمالي المبالغ المطلوبة":"Total Requested Amounts",
+  "المبالغ المعتمدة":"Approved Amounts",
+  "نسبة الاعتماد":"Approval Rate",
+  "عدد الدول":"Countries Count",
+  "العدد":"Count",
+  "الطلبات حسب الدولة":"Requests by Country",
+  "الشركة":"Company",
+  "تفاصيل جميع الطلبات":"All Requests Details",
+  "إجمالي المصروف":"Total Disbursed",
+  "إجمالي المطالبات":"Total Claims",
+  "جميع الخدمات":"All Services",
+  "نسبة الإنفاق":"Spending Rate",
+  "المصروف ÷ المطالبات":"Disbursed ÷ Claims",
+
+  // أسماء الخدمات
+  "تقديم الدعم خلال زيارة المشتري المحتمل":"Support During Potential Buyer Visit",
+  "تقديم الخدمات الاستشارية":"Consulting Services",
+  "المشاركة الفردية في المعارض الدولية":"Individual Participation in International Exhibitions",
+  "تقديم الدعم القانوني":"Legal Support",
+  "الإدراج في منصات التجارة الإلكترونية":"Listing on E-commerce Platforms",
+  "تسجيل المنتجات وإصدار شهادات الإنتاج":"Product Registration & Certification",
+  "تقديم الدعم اللغوي":"Language Support",
+  "دعم تخصيص المنتجات والخدمات":"Product & Service Customization Support",
+  "توفير التدريب المتخصص":"Specialized Training",
+  "التسويق والإعلان":"Marketing & Advertising"
+};
+
+
+// قاموس عكسي إنجليزي→عربي
+const I18N_REV = {};
+for(const k in I18N){ I18N_REV[I18N[k]] = k; }
+
+// ترجمة نص واحد حسب اللغة الحالية
+function tr(text){
+  if(!text) return text;
+  const t = text.trim();
+  if(STATE.lang==="en"){ return I18N[t] || text; }
+  else { return I18N_REV[t] || text; }
+}
+
+// المرور على كل عناصر النص في الصفحة وترجمتها
+function applyTranslation(){
+  const en = STATE.lang==="en";
+  // اتجاه الصفحة
+  document.documentElement.lang = en ? "en" : "ar";
+  document.documentElement.dir = en ? "ltr" : "rtl";
+
+  // المرور على كل العقد النصية
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      const t = (node.nodeValue||"").trim();
+      if(!t) return NodeFilter.FILTER_REJECT;
+      // نتخطى السكربت والستايل
+      const p = node.parentElement;
+      if(!p) return NodeFilter.FILTER_REJECT;
+      const tag = p.tagName;
+      if(tag==="SCRIPT"||tag==="STYLE") return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes=[];
+  let n; while(n=walker.nextNode()) nodes.push(n);
+  nodes.forEach(node=>{
+    const orig = node.nodeValue;
+    const key = orig.trim();
+    const dict = en ? I18N : I18N_REV;
+    if(dict[key]){
+      // نحافظ على المسافات حول النص
+      node.nodeValue = orig.replace(key, dict[key]);
+    }
+  });
+
+  // ترجمة placeholder للحقول
+  document.querySelectorAll("[placeholder]").forEach(el=>{
+    const ph = el.getAttribute("placeholder").trim();
+    const dict = en ? I18N : I18N_REV;
+    if(dict[ph]) el.setAttribute("placeholder", dict[ph]);
+  });
+}
+
 function toggleLang(){
   STATE.lang=STATE.lang==="ar"?"en":"ar";
   document.getElementById("langIcon").textContent=STATE.lang==="ar"?"EN":"ع";
-  toast("ميزة الترجمة قيد التطوير","");
+  applyTranslation();
+  toast(STATE.lang==="en"?"Language: English":"اللغة: العربية","ok");
 }
+
+// مراقب يترجم المحتوى الجديد تلقائياً عند تغيّره (إذا اللغة إنجليزي)
+let _i18nObserver=null;
+function startI18nObserver(){
+  if(_i18nObserver) return;
+  _i18nObserver=new MutationObserver(muts=>{
+    if(STATE.lang!=="en") return;
+    let need=false;
+    muts.forEach(m=>{ if(m.addedNodes&&m.addedNodes.length) need=true; });
+    if(need){ _i18nObserver.disconnect(); applyTranslation();
+      _i18nObserver.observe(document.body,{childList:true,subtree:true}); }
+  });
+  _i18nObserver.observe(document.body,{childList:true,subtree:true});
+}
+document.addEventListener("DOMContentLoaded",startI18nObserver);
 
 /* ============================================================
    عرض الخدمات (كروت)
