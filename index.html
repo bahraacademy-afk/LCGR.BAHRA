@@ -894,7 +894,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
       <div class="ai-ic">🤖</div>
       <div>
         <div>مساعد بحرة الذكي</div>
-        <div class="ai-sub">مدعوم بـ Gemini AI</div>
+        <div class="ai-sub">مدعوم بـ Groq AI</div>
       </div>
     </div>
     <button onclick="toggleAiChat()">✕</button>
@@ -1550,14 +1550,53 @@ function submitForm(){
     currency:"ريال سعودي",
     status:DEFAULT_STATUS, note:"", date:new Date().toISOString().slice(0,10),
     fields:data, fileName:fileNames,
-    ministryRef:"",  // رقم الوزارة - يدخله المدقق لاحقاً
-    completion:null  // للاستكمال لاحقاً
+    fileLinks:[],     // روابط المرفقات على Drive
+    ministryRef:"",   // رقم الوزارة - يدخله المدقق لاحقاً
+    completion:null   // للاستكمال لاحقاً
   };
-  STATE.requests.unshift(req); saveRequests();
-  pushToSheet(req);
-  closeForm();
-  toast("✓ تم إرسال الطلب بنجاح ("+req.refNo+")","ok");
-  setTimeout(()=>nav("myrequests"),600);
+
+  // رفع المرفقات على Google Drive ثم حفظ الطلب
+  const fileList=Object.values(files);
+  if(fileList.length && !SHEET_API.includes("PUT_YOUR")){
+    closeForm();
+    toast("⏳ جاري رفع المرفقات...","ok");
+    uploadAttachments(fileList, internalRef, (links)=>{
+      req.fileLinks=links;
+      // أضف الروابط لبيانات الحقول عشان تنحفظ في الشيت
+      req.fields._fileLinks=links;
+      STATE.requests.unshift(req); saveRequests();
+      pushToSheet(req);
+      toast("✓ تم إرسال الطلب مع المرفقات ("+req.refNo+")","ok");
+      setTimeout(()=>nav("myrequests"),600);
+    });
+  } else {
+    STATE.requests.unshift(req); saveRequests();
+    pushToSheet(req);
+    closeForm();
+    toast("✓ تم إرسال الطلب بنجاح ("+req.refNo+")","ok");
+    setTimeout(()=>nav("myrequests"),600);
+  }
+}
+
+/* رفع المرفقات تباعاً على Google Drive */
+function uploadAttachments(fileList, refNo, done){
+  const links=[]; let i=0;
+  function next(){
+    if(i>=fileList.length){ done(links); return; }
+    const f=fileList[i];
+    fetch(SHEET_API,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({action:"upload",name:f.name,mime:f.type,data:f.data,refNo:refNo})
+    })
+    .then(r=>r.json())
+    .then(res=>{
+      if(res&&res.ok){ links.push({name:res.name,url:res.url}); }
+      i++; next();
+    })
+    .catch(()=>{ i++; next(); });
+  }
+  next();
 }
 
 /* ============================================================
@@ -1796,7 +1835,16 @@ function viewDetail(id){
         <span style="color:var(--text-soft)">${f.l}</span><b>${v||"-"}</b></div>`;
     }
   }
-  if(r.fileName) html+=`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:8px"><span style="color:var(--text-soft)">المرفقات</span><b>📎 ${r.fileName}</b></div>`;
+  // روابط المرفقات (Google Drive)
+  const fileLinks=(r.fileLinks&&r.fileLinks.length)?r.fileLinks:((r.fields&&r.fields._fileLinks)||[]);
+  if(fileLinks&&fileLinks.length){
+    html+=`<div style="border-bottom:1px solid var(--border);padding-bottom:8px">
+      <div style="color:var(--text-soft);margin-bottom:6px">المرفقات</div>
+      ${fileLinks.map(f=>`<a href="${f.url}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);padding:6px 12px;border-radius:8px;text-decoration:none;margin:3px;font-size:.88rem">📎 ${f.name} ↗</a>`).join("")}
+    </div>`;
+  } else if(r.fileName){
+    html+=`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:8px"><span style="color:var(--text-soft)">المرفقات</span><b>📎 ${r.fileName}</b></div>`;
+  }
   if(r.currency) html+=`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:8px"><span style="color:var(--text-soft)">العملة</span><b>${r.currency}</b></div>`;
   const st=STATUS_MAP[r.status]||STATUS_MAP.submitted;
   html+=`<div style="display:flex;justify-content:space-between;padding-top:6px"><span style="color:var(--text-soft)">الحالة</span><span class="badge ${st.badge}">${st.label}</span></div>`;
@@ -2025,7 +2073,7 @@ function toast(msg,type){
 }
 
 /* ============================================================
-   🤖 الذكاء الاصطناعي (Gemini AI)
+   🤖 الذكاء الاصطناعي (Groq AI)
    ============================================================ */
 function aiFormatText(text){
   // تنسيق بسيط: تحويل **نص** إلى <b>نص</b>
@@ -2046,7 +2094,7 @@ function aiEvaluate(reqId){
   if(SHEET_API.includes("PUT_YOUR")){
     container.querySelector(".ai-eval-box").innerHTML=`
       <div class="ai-head"><span class="ai-badge">🤖 AI</span> تقييم الطلب الذكي</div>
-      <div class="ai-eval-body" style="color:var(--text-soft)">⚠️ ميزة AI تعمل فقط بعد ربط الشيت وتفعيل مفتاح Gemini API.</div>`;
+      <div class="ai-eval-body" style="color:var(--text-soft)">⚠️ ميزة AI تعمل فقط بعد ربط الشيت وتفعيل مفتاح Groq API.</div>`;
     return;
   }
   jsonp("ai",{mode:"evaluate",request:r},(res)=>{
@@ -2094,7 +2142,7 @@ function sendAiChat(){
   sendBtn.disabled=true;
   const loading=appendAiMsg("جاري التفكير...","bot");
   if(SHEET_API.includes("PUT_YOUR")){
-    loading.innerHTML="⚠️ المساعد الذكي يحتاج ربط الشيت وتفعيل مفتاح Gemini.<br>المنصة تعمل بشكل طبيعي بدونه.";
+    loading.innerHTML="⚠️ المساعد الذكي يحتاج ربط الشيت وتفعيل مفتاح Groq.<br>المنصة تعمل بشكل طبيعي بدونه.";
     sendBtn.disabled=false; return;
   }
   // سياق: عدد طلبات المستخدم الحالي
@@ -2124,7 +2172,7 @@ function aiReportSummary(){
   if(SHEET_API.includes("PUT_YOUR")){
     container.querySelector(".ai-eval-box").innerHTML=`
       <div class="ai-head"><span class="ai-badge">🤖 AI</span> الملخص التنفيذي الذكي</div>
-      <div class="ai-eval-body" style="color:var(--text-soft)">⚠️ هذي الميزة تعمل بعد ربط الشيت وتفعيل مفتاح Gemini API.</div>`;
+      <div class="ai-eval-body" style="color:var(--text-soft)">⚠️ هذي الميزة تعمل بعد ربط الشيت وتفعيل مفتاح Groq API.</div>`;
     return;
   }
   // جمع الإحصائيات
@@ -2353,7 +2401,7 @@ function aiEvaluate(id){
       html+=ev.concerns.map(s=>`<div style="padding:6px 0;color:var(--text-soft)">• ${s}</div>`).join("");
       html+=`</div>`;
     }
-    html+=`<div style="font-size:.75rem;color:var(--text-soft);text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🤖 تم التحليل بواسطة Gemini AI — التوصية استرشادية وللمراجع القرار النهائي</div>`;
+    html+=`<div style="font-size:.75rem;color:var(--text-soft);text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🤖 تم التحليل بواسطة Groq AI — التوصية استرشادية وللمراجع القرار النهائي</div>`;
     setAiModalContent(html);
   });
 }
@@ -2413,7 +2461,7 @@ function aiReportSummary(){
     }
     const txt=(res.result||"").replace(/\n/g,"<br>");
     setAiModalContent(`<div style="line-height:1.9;font-size:.98rem">${txt}</div>
-      <div style="font-size:.75rem;color:var(--text-soft);text-align:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">🤖 تم التحليل بواسطة Gemini AI</div>`);
+      <div style="font-size:.75rem;color:var(--text-soft);text-align:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">🤖 تم التحليل بواسطة Groq AI</div>`);
   });
 }
 
@@ -2427,7 +2475,7 @@ function toggleChatbot(){
     ov.style.cssText="position:fixed;bottom:96px;left:24px;width:380px;max-width:calc(100vw - 32px);height:520px;max-height:calc(100vh - 130px);background:var(--card-solid);border:1px solid var(--glass-border);border-radius:20px;box-shadow:0 30px 80px rgba(4,32,29,.3);z-index:400;display:none;flex-direction:column;overflow:hidden";
     ov.innerHTML=`
       <div style="padding:16px 18px;background:var(--grad-primary);color:#fff;display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">🤖</span><div><div style="font-weight:800">المساعد الذكي</div><div style="font-size:.74rem;opacity:.85">مدعوم بـ Gemini AI</div></div></div>
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">🤖</span><div><div style="font-weight:800">المساعد الذكي</div><div style="font-size:.74rem;opacity:.85">مدعوم بـ Groq AI</div></div></div>
         <button onclick="toggleChatbot()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
       </div>
       <div id="chatMessages" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px"></div>
