@@ -967,7 +967,7 @@ const SAUDI_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdoAAAE/CAIAAA
    نوع الحقل: text | number | date | select | textarea | file | email | tel
    ============================================================ */
 // قائمة الشركات الموحّدة
-const COMPANIES = ["شركة حلول للمحولات والقضبان الكهربائية","بحرة للكابلات","مجموعة بحرة","أخرى"];
+const COMPANIES = ["BCC","TBS","Bahra Metals","Electric House","أخرى"];
 // قائمة الدول الموحّدة
 const COUNTRIES = ["السعودية","الإمارات","الكويت","قطر","البحرين","عمان","مصر","الأردن","العراق","لبنان","المغرب","تونس","الجزائر","السودان","ليبيا","اليمن","سوريا","فلسطين","موريتانيا","الصومال","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","فرنسا","بريطانيا","إيطاليا","إسبانيا","الصين","الهند","تركيا","ماليزيا","إندونيسيا","سنغافورة","اليابان","كوريا الجنوبية","الولايات المتحدة","كندا","البرازيل","المكسيك","أخرى"];
 
@@ -1372,8 +1372,12 @@ function fieldHTML(f){
     </div>`;
   }
   else if(f.t==="select"){
-    input=`<select id="fld_${f.k}"><option value="">اختر...</option>`+
+    const onCh = f.k==="company" ? ` onchange="onCompanyChange()"` : "";
+    input=`<select id="fld_${f.k}"${onCh}><option value="">اختر...</option>`+
       f.opts.map(o=>`<option value="${o}">${o}</option>`).join("")+`</select>`;
+    if(f.k==="company"){
+      input+=`<input type="text" id="other_company" placeholder="اكتب اسم الشركة..." style="display:none;margin-top:10px">`;
+    }
   }
   else if(f.t==="file"){
     return `<div class="field"><label>${f.l} ${req}</label>
@@ -1394,6 +1398,13 @@ function onCbChange(k){
   cbs.forEach(cb=>{ if(cb.checked && cb.value==="أخرى") hasOther=true; });
   const inp=document.getElementById("other_"+k);
   if(inp) inp.style.display=hasOther?"block":"none";
+}
+function onCompanyChange(){
+  const sel=document.getElementById("fld_company");
+  const inp=document.getElementById("other_company");
+  if(!sel||!inp)return;
+  if(sel.value==="أخرى"){ inp.style.display="block"; inp.focus(); }
+  else { inp.style.display="none"; inp.value=""; }
 }
 function openForm(svcId){
   const s=SERVICES.find(x=>x.id===svcId); if(!s)return;
@@ -1454,7 +1465,14 @@ function submitForm(){
       continue;
     }
     const el=document.getElementById("fld_"+f.k);
-    const v=el?el.value.trim():"";
+    let v=el?el.value.trim():"";
+    // لو الشركة "أخرى" استبدلها بالاسم المكتوب
+    if(f.k==="company" && v==="أخرى"){
+      const otherInp=document.getElementById("other_company");
+      const customName=otherInp?otherInp.value.trim():"";
+      if(!customName){ ok=false; if(!firstBad)firstBad=otherInp; if(otherInp)otherInp.style.borderColor="var(--red)"; }
+      else { v=customName; if(otherInp)otherInp.style.borderColor=""; }
+    }
     if(f.req&&!v){ ok=false; if(!firstBad)firstBad=el; if(el)el.style.borderColor="var(--red)"; }
     else if(el) el.style.borderColor="";
     data[f.k]=v;
