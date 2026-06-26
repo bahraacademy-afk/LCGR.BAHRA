@@ -271,7 +271,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
   animation:modalPop .4s cubic-bezier(.2,.9,.3,1.2);
 }
 /* فورم تقديم الطلب - أوسع */
-#formOverlay .modal{max-width:920px}
+#formOverlay .modal{max-width:min(1400px, 94vw)}
 @keyframes modalPop{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 .modal-head{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .modal-head .ti h2{font-size:1.3rem;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -279,19 +279,25 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .close-x{background:var(--bg2);border:none;width:38px;height:38px;border-radius:12px;cursor:pointer;color:var(--text);font-size:1.1rem;flex-shrink:0;transition:.2s}
 .close-x:hover{background:var(--red);color:#fff;transform:rotate(90deg)}
 .modal-body{padding:28px;max-height:62vh;overflow-y:auto}
-#formOverlay .modal-body{max-height:72vh}
+#formOverlay .modal-body{max-height:80vh;padding:38px 46px}
 .modal-foot{padding:20px 28px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-start}
+#formOverlay .modal-head{padding:30px 46px}
+#formOverlay .modal-head .ti h2{font-size:1.6rem}
+#formOverlay .modal-head .ti p{font-size:.95rem}
+#formOverlay .modal-foot{padding:24px 46px}
 
-.field{margin-bottom:18px}
-.field label{display:block;font-weight:600;font-size:.9rem;margin-bottom:7px}
+.field{margin-bottom:24px}
+.field label{display:block;font-weight:600;font-size:1rem;margin-bottom:9px}
 .field label .req{color:var(--red)}
 .field input,.field select,.field textarea{
-  width:100%;padding:12px 15px;border:1px solid var(--border);border-radius:13px;
-  background:var(--bg2);color:var(--text);font-family:inherit;font-size:.92rem;transition:.2s;
+  width:100%;padding:16px 19px;border:1px solid var(--border);border-radius:14px;
+  background:var(--bg2);color:var(--text);font-family:inherit;font-size:1rem;transition:.2s;
 }
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
-.field textarea{resize:vertical;min-height:90px}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field textarea{resize:vertical;min-height:130px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+@media(max-width:760px){.field-row,.field-row-3{grid-template-columns:1fr}}
 .file-drop{border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:.25s;background:var(--bg2)}
 .file-drop:hover{border-color:var(--primary);background:var(--primary-light);transform:translateY(-2px)}
 .file-drop .fi{font-size:1.8rem;color:var(--primary)}
@@ -1398,7 +1404,7 @@ function openForm(svcId){
   let html=""; let group=[];
   const flushGroup=()=>{
     if(group.length){
-      html+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:18px">`+
+      html+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-bottom:22px">`+
         group.map(f=>fieldHTML(f).replace('<div class="field">','<div class="field" style="margin-bottom:0">')).join("")+`</div>`;
       group=[];
     }
