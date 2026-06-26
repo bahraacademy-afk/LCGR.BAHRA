@@ -1565,6 +1565,29 @@ const I18N = {
   "دعم تخصيص المنتجات والخدمات":"Product & Service Customization Support",
   "توفير التدريب المتخصص":"Specialized Training",
   "التسويق والإعلان":"Marketing & Advertising",
+  // الدول
+  "الإمارات العربية المتحدة":"United Arab Emirates",
+  "العراق":"Iraq",
+  "ألمانيا":"Germany",
+  "سوريا":"Syria",
+  "السودان":"Sudan",
+  "مصر":"Egypt",
+  "ليبيا":"Libya",
+  "المغرب":"Morocco",
+  "بريطانيا":"United Kingdom",
+  "فرنسا":"France",
+  "أثيوبيا":"Ethiopia",
+  "تنزانيا":"Tanzania",
+  "كينيا":"Kenya",
+  "نيجيريا":"Nigeria",
+  "موزمبيق":"Mozambique",
+  "ساحل العاج":"Ivory Coast",
+  // الوحدات والنصوص المتكررة
+  "ريال":"SAR",
+  "ريال سعودي":"SAR",
+  "طلب مصروف":"disbursed requests",
+  "طلب":"request",
+  "حالة الطلب":"Request Status",
   "تعويض المستفيد في تأمين الفرص التجارية الجديدة من خلال تغطية جزء من الرسوم ذات الصلة بالتعامل مع المشترين الدوليين.":"Compensates the beneficiary in securing new business opportunities by covering part of the related fees for dealing with international buyers.",
   "تعويض المستفيد في تجنب الرسوم ذات الصلة بفهم المتطلبات أو حجم الطلب في الأسواق الجديدة وإعداد استراتيجيات الدخول إلى السوق/النمو.":"Compensates the beneficiary in avoiding fees related to understanding requirements or demand size in new markets and preparing market entry/growth strategies.",
   "تعويض المستفيد في تحديد الفرص التجارية الجديدة من خلال حضور المعارض الدولية والتجارية التي يختارها.":"Compensates the beneficiary in identifying new business opportunities by attending international and trade exhibitions of their choice.",
@@ -2544,8 +2567,9 @@ function closeDashboard(){
 }
 function updateDashClock(){
   const now=new Date();
-  document.getElementById("dashTime").textContent=now.toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  document.getElementById("dashDate").textContent=now.toLocaleDateString("ar-SA",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const loc=STATE.lang==="en"?"en-US":"ar-SA";
+  document.getElementById("dashTime").textContent=now.toLocaleTimeString(loc,{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  document.getElementById("dashDate").textContent=now.toLocaleDateString(loc,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
 }
 function renderDashboard(){
   const all=STATE.requests;
@@ -2575,6 +2599,7 @@ function renderDashboard(){
   renderDashList("dashCountry",groupBy(all,r=>r.country).slice(0,7),"🌍");
   // منحنى السنوات
   renderDashYearChart(all);
+  if(STATE.lang==="en") setTimeout(applyTranslation,0);
 }
 function dashKpi(ic,lbl,val,sub,cls,flash){
   return `<div class="dash-kpi">
@@ -2599,8 +2624,10 @@ function renderDashStatus(all){
     const c=counts[st]||0;
     const pct=Math.round(c/max*100);
     const pctTotal=all.length?Math.round(c/all.length*100):0;
+    let lbl=sm.label.split(" - ")[0];
+    if(STATE.lang==="en"&&typeof tr==="function") lbl=tr(sm.label).split(" - ")[0];
     return `<div class="dash-stat-row">
-      <span class="dsr-label">${sm.icon} ${sm.label.split(" - ")[0].substring(0,22)}</span>
+      <span class="dsr-label">${sm.icon} ${lbl.substring(0,28)}</span>
       <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${pct}%"></div></div>
       <span class="dsr-val">${c} <span style="color:var(--text-soft);font-weight:500;font-size:.8rem">(${pctTotal}%)</span></span>
     </div>`;
@@ -2612,9 +2639,10 @@ function renderDashList(elId,data,icon){
   const max=Math.max(...data.map(d=>d[1]));
   el.innerHTML=data.map(([label,val])=>{
     const pct=Math.round(val/max*100);
-    const short=label.length>26?label.substring(0,26)+"…":label;
+    const lbl=(STATE.lang==="en"&&typeof tr==="function")?tr(label):label;
+    const short=lbl.length>26?lbl.substring(0,26)+"…":lbl;
     return `<div class="dash-stat-row">
-      <span class="dsr-label" title="${label}">${short}</span>
+      <span class="dsr-label" title="${lbl}">${short}</span>
       <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${pct}%"></div></div>
       <span class="dsr-val">${val}</span>
     </div>`;
