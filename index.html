@@ -1309,7 +1309,7 @@ function enterApp(){
   if(window.innerWidth<=900) document.getElementById("mobileNav").style.display="flex";
   document.getElementById("userName").textContent=STATE.user;
   document.getElementById("userAv").textContent=(STATE.user[0]||"U").toUpperCase();
-  document.getElementById("welcomeMsg").textContent="مرحباً "+STATE.user+" 👋";
+  document.getElementById("welcomeMsg").textContent=(STATE.lang==="en"?"Welcome ":"مرحباً ")+STATE.user+" 👋";
   // إظهار أدوات الأدمن
   const isAdmin=STATE.role==="admin"||STATE.role==="reviewer";
   document.querySelectorAll(".admin-only").forEach(e=>e.style.display=isAdmin?"":"none");
@@ -1372,6 +1372,12 @@ const I18N = {
   "متابعة فورية لحالة طلباتك":"Real-time tracking of your requests",
   "تقارير ومؤشرات أداء شاملة":"Comprehensive reports & KPIs",
   "© مجموعة بحرة للكهرباء":"© Bahra Electric Group",
+  "مجموعة بحرة للكهرباء — برنامج الصادرات السعودية":"Bahra Electric Group — Saudi Exports Program",
+  "منصة موحدة لتقديم ومتابعة طلبات خدمات دعم الحوافز":"A unified platform to submit & track incentives support requests",
+  "هذا الرقم الذي يصدر من بوابة الصادرات بعد رفع الطلب رسمياً":"The number issued by the Exports portal after official submission",
+  "⚠️ ميزة AI تعمل فقط بعد ربط الشيت وتفعيل مفتاح Groq API.":"⚠️ AI works only after linking the Sheet & activating the Groq API key.",
+  "⚠️ هذي الميزة تعمل بعد ربط الشيت وتفعيل مفتاح Groq API.":"⚠️ This feature works after linking the Sheet & activating the Groq API key.",
+  "مرحباً بك 👋":"Welcome 👋",
 
   // تسجيل الدخول
   "تسجيل الدخول":"Login",
@@ -1518,6 +1524,12 @@ const I18N = {
 
   // الإحصائيات
   "إجمالي الطلبات":"Total Requests",
+  "قيد المعالجة":"In Progress",
+  "تم صرفها":"Disbursed",
+  "الخدمات المتاحة":"Available Services",
+  "إجمالي المصروف":"Total Disbursed",
+  "إجمالي المطالبات":"Total Claims",
+  "جميع الخدمات":"All Services",
   "المعتمدة (تم الصرف)":"Approved (Disbursed)",
   "المصروفة":"Disbursed",
   "تقرير طلب حافز":"Incentive Request Report",
@@ -1571,9 +1583,8 @@ function tr(text){
 // المرور على كل عناصر النص في الصفحة وترجمتها
 function applyTranslation(){
   const en = STATE.lang==="en";
-  // اتجاه الصفحة
+  // نبقي الاتجاه RTL دائماً (التصميم مبني على RTL) - نترجم النص فقط
   document.documentElement.lang = en ? "en" : "ar";
-  document.documentElement.dir = en ? "ltr" : "rtl";
 
   // المرور على كل العقد النصية
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
@@ -2299,6 +2310,7 @@ function renderHomeKpis(){
     ${kpiHTML("⏳","قيد المعالجة",pending,"b-gold")}
     ${kpiHTML("✓","تم صرفها",approved,"b-blue")}
     ${kpiHTML("📋","الخدمات المتاحة",SERVICES.length,"b-red")}`;
+  if(STATE.lang==="en") setTimeout(applyTranslation,0);
 }
 function groupCount(fn){
   const m={}; STATE.requests.forEach(r=>{const k=fn(r)||"-";m[k]=(m[k]||0)+1;});
