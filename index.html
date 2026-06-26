@@ -1508,7 +1508,7 @@ function submitForm(){
    ============================================================ */
 function renderMyRequests(){
   const q=(document.getElementById("myReqSearch").value||"").toLowerCase();
-  const mine=STATE.requests.filter(r=>r.applicant===STATE.user||STATE.role==="admin");
+  const mine=STATE.requests.filter(r=>r.applicant===STATE.user||STATE.role==="admin"||STATE.role==="reviewer");
   const rows=mine.filter(r=>!q||JSON.stringify(r).toLowerCase().includes(q));
   const thead=document.querySelector("#myReqTable thead");
   const tbody=document.querySelector("#myReqTable tbody");
@@ -1866,11 +1866,14 @@ function renderReportKpis(){
     ${kpiHTML("🌍","عدد الدول",new Set(all.map(r=>r.country)).size,"b-red")}`;
 }
 function renderHomeKpis(){
-  const all=STATE.requests;
+  const isAdmin=STATE.role==="admin"||STATE.role==="reviewer";
+  // الأدمن/المراجع يشوف كل الطلبات، اليوزر يشوف بس طلباته
+  const all=isAdmin?STATE.requests:STATE.requests.filter(r=>r.applicant===STATE.user);
   const pending=all.filter(r=>r.status==="submitted"||r.status==="preliminary"||r.status==="review").length;
   const approved=all.filter(r=>r.status==="disbursed").length;
+  const firstLabel=isAdmin?"إجمالي الطلبات":"طلباتي";
   document.getElementById("homeKpis").innerHTML=`
-    ${kpiHTML("📑","إجمالي الطلبات",all.length,"b-green")}
+    ${kpiHTML("📑",firstLabel,all.length,"b-green")}
     ${kpiHTML("⏳","قيد المعالجة",pending,"b-gold")}
     ${kpiHTML("✓","تم صرفها",approved,"b-blue")}
     ${kpiHTML("📋","الخدمات المتاحة",SERVICES.length,"b-red")}`;
