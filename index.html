@@ -923,11 +923,11 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 
 <!-- مودال استكمال الطلب -->
 <div class="overlay" id="completeOverlay">
-  <div class="modal" style="max-width:600px">
+  <div class="modal" style="max-width:680px">
     <div class="modal-head">
       <div class="ti">
-        <h2>استكمال متطلبات الطلب</h2>
-        <p id="completeSub">رفع المستندات المطلوبة وإضافة تعليق</p>
+        <h2>استكمال متطلبات الصرف</h2>
+        <p id="completeSub">ارفع المستندات المطلوبة لاستكمال طلب الصرف</p>
       </div>
       <button class="close-x" onclick="closeCompleteModal()">✕</button>
     </div>
@@ -935,18 +935,10 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
       <div id="completeNote" style="background:var(--primary-light);padding:14px;border-radius:12px;margin-bottom:18px;font-size:.9rem;border-right:4px solid var(--primary);display:none">
         <b>ملاحظة المراجع:</b> <span id="completeReviewerNote"></span>
       </div>
-      <div class="field">
-        <label>المستندات الإضافية</label>
-        <div class="file-drop" onclick="document.getElementById('completeFile').click()">
-          <div class="fi">📎</div>
-          <div class="ft">اضغط لرفع ملف (PDF, DOCX, PNG, JPG)</div>
-          <div class="fn" id="completeFileName"></div>
-        </div>
-        <input type="file" id="completeFile" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none" onchange="onCompleteFile()">
-      </div>
-      <div class="field">
+      <div id="completeDocsWrap"></div>
+      <div class="field" style="margin-top:8px">
         <label>تعليقك على الاستكمال</label>
-        <textarea id="completeComment" placeholder="اكتب تعليقك هنا..."></textarea>
+        <textarea id="completeComment" placeholder="اكتب تعليقك هنا... (اختياري)"></textarea>
       </div>
     </div>
     <div class="modal-foot">
@@ -1531,6 +1523,14 @@ const I18N = {
   "رقم الطلب في الصادرات":"Exports Request Number",
   "✓ تأكيد الرفع للصادرات":"✓ Confirm Submission to Exports",
   "استكمال متطلبات الطلب":"Complete Request Requirements",
+  "استكمال متطلبات الصرف":"Complete Disbursement Requirements",
+  "ارفع المستندات المطلوبة لاستكمال طلب الصرف":"Upload required documents to complete the disbursement request",
+  "الفاتورة الأصلية الرسمية للرسوم المدفوعة":"Original official invoice for paid fees",
+  "نموذج الآيبان البنكي للحساب المحوّل منه (مصدّق من البنك)":"Bank IBAN form for the source account (bank-certified)",
+  "إثبات التحويل":"Transfer proof",
+  "تقرير ما بعد الاستفادة من الخدمة":"Post-service benefit report",
+  "إثبات القيام بالخدمة":"Proof of service completion",
+  "📤 مستندات الاستكمال":"📤 Completion Documents",
   "رفع المستندات المطلوبة وإضافة تعليق":"Upload required documents & add a comment",
   "ملاحظة المراجع:":"Reviewer Note:",
   "المستندات الإضافية":"Additional Documents",
@@ -2165,16 +2165,37 @@ function setStatus(id,status){
 
 /* ===== استكمال الطلب (User Step 2) ===== */
 let _completeId=null;
-let _completeFile=null;
+// المستندات المطلوبة في الاستكمال (كلها إجبارية)
+const COMPLETION_DOCS=[
+  {k:"invoice",   l:"الفاتورة الأصلية الرسمية للرسوم المدفوعة"},
+  {k:"iban",      l:"نموذج الآيبان البنكي للحساب المحوّل منه (مصدّق من البنك)"},
+  {k:"transfer",  l:"إثبات التحويل"},
+  {k:"afterReport",l:"تقرير ما بعد الاستفادة من الخدمة"},
+  {k:"proofService",l:"إثبات القيام بالخدمة"}
+];
+let _completeFiles={};  // {docKey:{name,type,data}}
+
+function buildCompletionDocs(){
+  const wrap=document.getElementById("completeDocsWrap");
+  wrap.innerHTML=COMPLETION_DOCS.map(d=>`
+    <div class="field" style="margin-bottom:14px">
+      <label>${d.l} <span class="req">*</span></label>
+      <div class="file-drop" onclick="document.getElementById('cdoc_${d.k}').click()" style="padding:16px">
+        <div class="fi">📎</div>
+        <div class="ft">اضغط لرفع ملف (PDF, DOCX, PNG, JPG)</div>
+        <div class="fn" id="cdocName_${d.k}" style="color:var(--primary);font-weight:600;margin-top:6px"></div>
+      </div>
+      <input type="file" id="cdoc_${d.k}" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none" onchange="onCompleteDocFile('${d.k}')">
+    </div>`).join("");
+}
+
 function openCompleteModal(id){
   const r=STATE.requests.find(x=>x.id===id); if(!r)return;
   if(r.status!=="preliminary"){ toast("الطلب ليس في مرحلة الاستكمال","err"); return; }
-  _completeId=id; _completeFile=null;
-  document.getElementById("completeFileName").textContent="";
+  _completeId=id; _completeFiles={};
+  buildCompletionDocs();
   document.getElementById("completeComment").value="";
-  document.getElementById("completeFile").value="";
   document.getElementById("completeSub").textContent=r.serviceName+" — "+r.refNo;
-  // إظهار ملاحظة المراجع لو موجودة
   const noteBox=document.getElementById("completeNote");
   if(r.note){
     document.getElementById("completeReviewerNote").textContent=r.note;
@@ -2184,15 +2205,15 @@ function openCompleteModal(id){
 }
 function closeCompleteModal(){
   document.getElementById("completeOverlay").classList.remove("show");
-  _completeId=null; _completeFile=null;
+  _completeId=null; _completeFiles={};
 }
-function onCompleteFile(){
-  const inp=document.getElementById("completeFile");
+function onCompleteDocFile(docKey){
+  const inp=document.getElementById("cdoc_"+docKey);
   if(inp.files&&inp.files[0]){
     const f=inp.files[0];
-    document.getElementById("completeFileName").textContent="✓ "+f.name+" ("+(f.size/1024).toFixed(0)+" KB)";
+    document.getElementById("cdocName_"+docKey).textContent="✓ "+f.name+" ("+(f.size/1024).toFixed(0)+" KB)";
     const r=new FileReader();
-    r.onload=()=>{ _completeFile={name:f.name,type:f.type,data:r.result.split(",")[1]}; };
+    r.onload=()=>{ _completeFiles[docKey]={name:f.name,type:f.type,data:r.result.split(",")[1]}; };
     r.readAsDataURL(f);
   }
 }
@@ -2200,21 +2221,53 @@ function submitCompletion(){
   if(!_completeId)return;
   const r=STATE.requests.find(x=>x.id===_completeId); if(!r)return;
   const comment=document.getElementById("completeComment").value.trim();
-  if(!comment && !_completeFile){
-    toast("الرجاء إضافة مستند أو تعليق","err"); return;
+  // التحقق: كل المستندات الخمسة إجبارية
+  const missing=COMPLETION_DOCS.filter(d=>!_completeFiles[d.k]);
+  if(missing.length){
+    toast("الرجاء رفع كل المستندات المطلوبة ("+missing.length+" ناقصة)","err");
+    // تمييز الناقص
+    missing.forEach(d=>{
+      const drop=document.getElementById("cdoc_"+d.k).previousElementSibling;
+      if(drop) drop.style.borderColor="var(--red)";
+    });
+    return;
   }
-  // حفظ بيانات الاستكمال + نقل لمرحلة "تحت الدراسة" تلقائياً
-  r.completion={
-    comment:comment,
-    fileName:_completeFile?_completeFile.name:"",
-    date:new Date().toISOString().slice(0,10),
-    by:STATE.user
-  };
-  r.status="review";  // تلقائياً ينتقل لتحت الدراسة
-  saveRequests(); updateSheetStatus(r);
+  // رفع المستندات على Drive ثم حفظ الاستكمال
+  const docsList=COMPLETION_DOCS.map(d=>({key:d.k,label:d.l,file:_completeFiles[d.k]}));
   closeCompleteModal();
-  toast("✓ تم إرسال الاستكمال بنجاح","ok");
-  renderMyRequests();
+  toast("⏳ جاري رفع المستندات...","ok");
+  uploadCompletionDocs(docsList, r.refNo, (links)=>{
+    r.completion={
+      comment:comment,
+      docs:links,                              // [{label,name,url}]
+      fileName:links.map(l=>l.name).join("، "),
+      date:new Date().toISOString().slice(0,10),
+      by:STATE.user
+    };
+    r.status="review";  // ينتقل تلقائياً لتحت الدراسة
+    saveRequests(); updateSheetStatus(r);
+    toast("✓ تم إرسال الاستكمال بنجاح","ok");
+    renderMyRequests();
+  });
+}
+// رفع مستندات الاستكمال تباعاً على Drive
+function uploadCompletionDocs(docsList, refNo, done){
+  const links=[]; let i=0;
+  function next(){
+    if(i>=docsList.length){ done(links); return; }
+    const d=docsList[i];
+    if(SHEET_API.includes("PUT_YOUR")){ // لا يوجد رابط حقيقي
+      links.push({label:d.label,name:d.file.name,url:""}); i++; next(); return;
+    }
+    fetch(SHEET_API,{
+      method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({action:"upload",name:d.label+" - "+d.file.name,mime:d.file.type,data:d.file.data,refNo:refNo})
+    })
+    .then(res=>res.json())
+    .then(res=>{ links.push({label:d.label,name:d.file.name,url:(res&&res.url)||""}); i++; next(); })
+    .catch(()=>{ links.push({label:d.label,name:d.file.name,url:""}); i++; next(); });
+  }
+  next();
 }
 
 /* ============================================================
@@ -2254,10 +2307,16 @@ function viewDetail(id){
   html+=`<div style="display:flex;justify-content:space-between;padding-top:6px"><span style="color:var(--text-soft)">الحالة</span><span class="badge ${st.badge}">${st.label}</span></div>`;
   if(r.note)html+=`<div style="background:var(--bg);padding:12px;border-radius:10px;margin-top:6px"><b>ملاحظة المراجع:</b> ${r.note}</div>`;
   if(r.completion){
+    const docs=r.completion.docs||[];
     html+=`<div style="background:var(--primary-light);padding:14px;border-radius:12px;margin-top:10px;border-right:4px solid var(--primary)">
-      <div style="font-weight:800;color:var(--primary);margin-bottom:6px">📤 الاستكمال (بتاريخ ${r.completion.date})</div>
-      ${r.completion.comment?`<div style="margin-bottom:6px"><b>التعليق:</b> ${r.completion.comment}</div>`:""}
-      ${r.completion.fileName?`<div><b>المرفق:</b> 📎 ${r.completion.fileName}</div>`:""}
+      <div style="font-weight:800;color:var(--primary);margin-bottom:8px">📤 مستندات الاستكمال (بتاريخ ${r.completion.date})</div>
+      ${r.completion.comment?`<div style="margin-bottom:10px"><b>التعليق:</b> ${r.completion.comment}</div>`:""}
+      ${docs.length?docs.map(d=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--border)">
+          <span style="font-size:.85rem;color:var(--text-soft)">${d.label||d.name}</span>
+          ${d.url?`<a href="${d.url}" target="_blank" style="background:var(--primary);color:#fff;padding:4px 12px;border-radius:7px;text-decoration:none;font-size:.8rem;white-space:nowrap">📎 عرض ↗</a>`:`<span style="font-size:.78rem;color:var(--text-soft)">📎 ${d.name}</span>`}
+        </div>`).join(""):
+        (r.completion.fileName?`<div><b>المرفق:</b> 📎 ${r.completion.fileName}</div>`:"")}
     </div>`;
   }
   html+=`</div>`;
