@@ -389,6 +389,9 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .btn-ghost:hover{background:var(--border);transform:translateY(-2px)}
 .btn-red{background:linear-gradient(135deg,#e2231a,#ff6b63);color:#fff;box-shadow:0 8px 20px rgba(226,35,26,.3)}
 .btn-warn{background:linear-gradient(135deg,#e8820e,#f5a93c);color:#fff;box-shadow:0 8px 20px rgba(232,130,14,.3)}
+.flt-select{padding:9px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;cursor:pointer;transition:border-color .2s}
+.flt-select:hover{border-color:var(--primary)}
+.flt-select:focus{outline:none;border-color:var(--primary)}
 .btn-red:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(226,35,26,.45)}
 
 /* ====== TABS (admin) ====== */
@@ -758,7 +761,16 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
       <div class="panel">
         <div class="panel-head">
           <h2>سجل الطلبات</h2>
-          <div class="toolbar">
+          <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+            <select id="myReqFilter" onchange="renderMyRequests()" class="flt-select">
+              <option value="">كل الحالات</option>
+              <option value="submitted">تم الإرسال للموافقة</option>
+              <option value="preliminary">قبول مبدئي</option>
+              <option value="review">تحت الدراسة</option>
+              <option value="returned">معاد لاستكمال النواقص</option>
+              <option value="disbursed">تم الصرف</option>
+              <option value="rejected">مرفوض</option>
+            </select>
             <div class="search-box"><input id="myReqSearch" placeholder="بحث..." oninput="renderMyRequests()"><span>🔍</span></div>
           </div>
         </div>
@@ -778,20 +790,34 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
       </div>
       <div class="kpi-grid" id="adminKpis"></div>
       <div class="panel">
-        <div class="panel-head">
+        <div class="panel-head" style="flex-wrap:wrap;gap:10px">
           <h2>جميع الطلبات</h2>
-          <div class="toolbar">
-            <select id="adminFilter" onchange="renderAdminTable()" style="padding:9px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:inherit">
+          <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+            <select id="adminFilter" onchange="renderAdminTable()" class="flt-select">
               <option value="">كل الحالات</option>
               <option value="submitted">تم الإرسال للموافقة</option>
               <option value="preliminary">قبول مبدئي</option>
               <option value="review">تحت الدراسة</option>
+              <option value="returned">معاد لاستكمال النواقص</option>
               <option value="disbursed">تم الصرف</option>
               <option value="rejected">مرفوض</option>
+            </select>
+            <select id="adminServiceFilter" onchange="renderAdminTable()" class="flt-select">
+              <option value="">كل الخدمات</option>
+            </select>
+            <select id="adminCompanyFilter" onchange="renderAdminTable()" class="flt-select">
+              <option value="">كل الشركات</option>
+            </select>
+            <select id="adminSort" onchange="renderAdminTable()" class="flt-select">
+              <option value="newest">الأحدث أولاً</option>
+              <option value="oldest">الأقدم أولاً</option>
+              <option value="amount_high">المبلغ (الأعلى)</option>
+              <option value="amount_low">المبلغ (الأقل)</option>
             </select>
             <div class="search-box"><input id="adminSearch" placeholder="بحث..." oninput="renderAdminTable()"><span>🔍</span></div>
           </div>
         </div>
+        <div id="adminResultCount" style="padding:0 4px 10px;color:var(--text-soft);font-size:.85rem"></div>
         <div class="tbl-wrap"><table id="adminTable"><thead></thead><tbody></tbody></table></div>
       </div>
     </section>
@@ -1500,6 +1526,14 @@ const I18N = {
   "🖥️ وضع العرض":"🖥️ Display Mode",
   "جميع الطلبات":"All Requests",
   "كل الحالات":"All Statuses",
+  "كل الخدمات":"All Services",
+  "كل الشركات":"All Companies",
+  "الأحدث أولاً":"Newest First",
+  "الأقدم أولاً":"Oldest First",
+  "المبلغ (الأعلى)":"Amount (Highest)",
+  "المبلغ (الأقل)":"Amount (Lowest)",
+  "معاد لاستكمال النواقص":"Returned for Completion",
+  "لا توجد طلبات مطابقة":"No matching requests",
 
   // الحالات (مختصرة في الفلاتر)
   "تم الإرسال للموافقة":"Submitted for Approval",
@@ -2041,10 +2075,24 @@ function uploadAttachments(fileList, refNo, done){
 /* ============================================================
    طلباتي
    ============================================================ */
+// ترتيب الطلبات: الجديد → القديم (حسب التاريخ ثم الرقم التسلسلي)
+function sortNewestFirst(arr){
+  return arr.slice().sort((a,b)=>{
+    const da=new Date(a.date||0).getTime()||0;
+    const db=new Date(b.date||0).getTime()||0;
+    if(db!==da) return db-da;
+    // عند تساوي التاريخ: نرتّب بالـ id (الأحدث id أكبر)
+    return String(b.id).localeCompare(String(a.id));
+  });
+}
+
 function renderMyRequests(){
   const q=(document.getElementById("myReqSearch").value||"").toLowerCase();
+  const stFilter=(document.getElementById("myReqFilter")||{}).value||"";
   const mine=STATE.requests.filter(r=>r.applicant===STATE.user||STATE.role==="admin"||STATE.role==="reviewer");
-  const rows=mine.filter(r=>!q||JSON.stringify(r).toLowerCase().includes(q));
+  let rows=mine.filter(r=>!q||JSON.stringify(r).toLowerCase().includes(q));
+  if(stFilter)rows=rows.filter(r=>r.status===stFilter);
+  rows=sortNewestFirst(rows);  // الجديد أولاً
   const thead=document.querySelector("#myReqTable thead");
   const tbody=document.querySelector("#myReqTable tbody");
   thead.innerHTML=`<tr><th>رقم الطلب</th><th>الخدمة</th><th>الدولة</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr>`;
@@ -2080,16 +2128,46 @@ function renderAdminKpis(){
     ${kpiHTML("✅","تم صرفها",approved,"b-blue")}
     ${kpiHTML("💰","إجمالي المبالغ",fmtMoney(total),"b-red")}`;
 }
+function fillAdminFilters(){
+  // تعبئة قوائم الخدمات والشركات (مرة واحدة)
+  const svcSel=document.getElementById("adminServiceFilter");
+  const compSel=document.getElementById("adminCompanyFilter");
+  if(svcSel && svcSel.options.length<=1){
+    SERVICES.forEach(s=>{ const o=document.createElement("option"); o.value=s.name; o.textContent=s.name; svcSel.appendChild(o); });
+  }
+  if(compSel && compSel.options.length<=1){
+    const comps=[...new Set(STATE.requests.map(r=>(r.fields&&r.fields.company)||r.company).filter(Boolean))];
+    comps.forEach(c=>{ const o=document.createElement("option"); o.value=c; o.textContent=c; compSel.appendChild(o); });
+  }
+}
 function renderAdminTable(){
+  fillAdminFilters();
   const q=(document.getElementById("adminSearch").value||"").toLowerCase();
   const filter=document.getElementById("adminFilter").value;
+  const svcFilter=(document.getElementById("adminServiceFilter")||{}).value||"";
+  const compFilter=(document.getElementById("adminCompanyFilter")||{}).value||"";
+  const sortBy=(document.getElementById("adminSort")||{}).value||"newest";
+
   let rows=STATE.requests.slice();
   if(filter)rows=rows.filter(r=>r.status===filter);
+  if(svcFilter)rows=rows.filter(r=>r.serviceName===svcFilter);
+  if(compFilter)rows=rows.filter(r=>((r.fields&&r.fields.company)||r.company)===compFilter);
   if(q)rows=rows.filter(r=>JSON.stringify(r).toLowerCase().includes(q));
+
+  // الترتيب
+  if(sortBy==="newest") rows=sortNewestFirst(rows);
+  else if(sortBy==="oldest") rows=sortNewestFirst(rows).reverse();
+  else if(sortBy==="amount_high") rows.sort((a,b)=>(parseFloat(b.amount)||0)-(parseFloat(a.amount)||0));
+  else if(sortBy==="amount_low") rows.sort((a,b)=>(parseFloat(a.amount)||0)-(parseFloat(b.amount)||0));
+
+  // عدّاد النتائج
+  const cnt=document.getElementById("adminResultCount");
+  if(cnt) cnt.textContent=`عرض ${rows.length} من ${STATE.requests.length} طلب`;
+
   const thead=document.querySelector("#adminTable thead");
   const tbody=document.querySelector("#adminTable tbody");
   thead.innerHTML=`<tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>الخدمة</th><th>الدولة</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr>`;
-  if(!rows.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="ei">📭</div><p>لا توجد طلبات</p></div></td></tr>`; return; }
+  if(!rows.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="ei">📭</div><p>لا توجد طلبات مطابقة</p></div></td></tr>`; return; }
   tbody.innerHTML=rows.map(r=>{
     const st=STATUS_MAP[r.status]||STATUS_MAP.submitted;
     const nextStage=getNextStage(r.status);
