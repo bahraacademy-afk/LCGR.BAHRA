@@ -319,6 +319,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .badge.green{background:#dcf3e6;color:#176a3a}
 .badge.red{background:#fde0de;color:#c41e16}
 .badge.amber{background:#fcefcf;color:#9a7414}
+.badge.orange{background:#ffe8d1;color:#b35309}
 .badge.blue{background:#dceafb;color:#1e5a96}
 .badge.gray{background:#e8ecf0;color:#5b6670}
 [data-theme="dark"] .badge.green{background:#16352440;color:#3dd88a}
@@ -350,7 +351,12 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .close-x:hover{background:var(--red);color:#fff;transform:rotate(90deg)}
 .modal-body{padding:28px;max-height:62vh;overflow-y:auto}
 #formOverlay .modal-body{max-height:80vh;padding:38px 46px}
-.modal-foot{padding:20px 28px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-start}
+.modal-foot{padding:20px 28px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start;flex-wrap:wrap}
+.modal-foot .btn{flex:0 1 auto;white-space:nowrap}
+/* فوتر تفاصيل الطلب: أزرار مرتبة في شبكة منظّمة */
+#detailFoot{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+#detailFoot .btn{width:100%;justify-content:center;white-space:nowrap;font-size:.9rem;padding:11px 14px}
+@media(max-width:560px){#detailFoot{grid-template-columns:repeat(2,1fr)}}
 #formOverlay .modal-head{padding:30px 46px}
 #formOverlay .modal-head .ti h2{font-size:1.6rem}
 #formOverlay .modal-head .ti p{font-size:.95rem}
@@ -382,6 +388,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .btn-ghost{background:var(--bg2);color:var(--text);border:1px solid var(--glass-border)}
 .btn-ghost:hover{background:var(--border);transform:translateY(-2px)}
 .btn-red{background:linear-gradient(135deg,#e2231a,#ff6b63);color:#fff;box-shadow:0 8px 20px rgba(226,35,26,.3)}
+.btn-warn{background:linear-gradient(135deg,#e8820e,#f5a93c);color:#fff;box-shadow:0 8px 20px rgba(232,130,14,.3)}
 .btn-red:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(226,35,26,.45)}
 
 /* ====== TABS (admin) ====== */
@@ -896,6 +903,26 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
   </div>
 </div>
 
+<!-- مودال إعادة الطلب لاستكمال النواقص -->
+<div class="overlay" id="returnOverlay">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head">
+      <div class="ti"><h2>↩️ إعادة لاستكمال النواقص</h2><p>حدّد النواقص المطلوبة من مقدّم الطلب</p></div>
+      <button class="close-x" onclick="closeReturnModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>النواقص المطلوبة <span class="req">*</span></label>
+        <textarea id="returnReason" placeholder="مثال: نموذج الآيبان غير مصدّق من البنك، يرجى إعادة رفعه..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-warn" onclick="confirmReturn()">↩️ إعادة للمستخدم</button>
+      <button class="btn btn-ghost" onclick="closeReturnModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <!-- مودال رفع الطلب للصادرات (إدخال رقم الطلب في الصادرات) -->
 <div class="overlay" id="ministryOverlay">
   <div class="modal" style="max-width:520px">
@@ -1254,6 +1281,7 @@ const STATUS_MAP = {
   submitted:  {label:"تم إرسال الطلب للصادرات لأخذ الموافقة", badge:"blue",  step:1, icon:"📤"},
   preliminary:{label:"قبول مبدئي - بانتظار استكمال متطلبات الصرف", badge:"amber", step:2, icon:"📝"},
   review:     {label:"طلب الصرف تحت الدراسة", badge:"amber", step:3, icon:"🔍"},
+  returned:   {label:"معاد لاستكمال نواقص صرف الحافز", badge:"orange", step:3, icon:"↩️"},
   disbursed:  {label:"تم صرف طلب الحافز", badge:"green", step:4, icon:"✅"},
   rejected:   {label:"مرفوض", badge:"red", step:0, icon:"❌"}
 };
@@ -1485,6 +1513,12 @@ const I18N = {
   "قبول مبدئي - بانتظار استكمال متطلبات الصرف":"Preliminary acceptance - awaiting disbursement requirements",
   "طلب الصرف تحت الدراسة":"Disbursement request under review",
   "تم صرف طلب الحافز":"Incentive disbursed",
+  "معاد لاستكمال نواقص صرف الحافز":"Returned to complete disbursement requirements",
+  "↩️ إعادة لاستكمال النواقص":"↩️ Return to Complete Requirements",
+  "النواقص المطلوبة":"Required Items",
+  "حدّد النواقص المطلوبة من مقدّم الطلب":"Specify the required items from the applicant",
+  "↩️ إعادة للمستخدم":"↩️ Return to User",
+  "↩️ استكمال النواقص":"↩️ Complete Requirements",
 
   // التقارير
   "‹ التقارير":"‹ Reports",
@@ -2016,8 +2050,8 @@ function renderMyRequests(){
   if(!rows.length){ tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="ei">📭</div><p>لا توجد طلبات بعد</p></div></td></tr>`; return; }
   tbody.innerHTML=rows.map(r=>{
     const st=STATUS_MAP[r.status]||STATUS_MAP.submitted;
-    const canComplete=(r.status==="preliminary"&&!r.completion&&r.applicant===STATE.user);
-    const completeBtn=canComplete?` <button class="act-btn approve" onclick="openCompleteModal('${r.id}')">📤 استكمال</button>`:"";
+    const canComplete=((r.status==="preliminary"||r.status==="returned")&&r.applicant===STATE.user);
+    const completeBtn=canComplete?` <button class="act-btn approve" onclick="openCompleteModal('${r.id}')">${r.status==="returned"?"↩️ استكمال النواقص":"📤 استكمال"}</button>`:"";
     return `<tr>
       <td><b>${r.refNo}</b>${r.ministryRef?`<br><span style="font-size:.74rem;color:var(--primary)">🏛️ الصادرات: ${r.ministryRef}</span>`:""}</td>
       <td>${r.serviceName}</td>
@@ -2163,6 +2197,34 @@ function setStatus(id,status){
   renderAdminTable(); renderAdminKpis();
 }
 
+/* ===== إعادة الطلب لاستكمال النواقص (المدقق) ===== */
+let _returnId=null;
+function returnForCompletion(id){
+  const r=STATE.requests.find(x=>x.id===id); if(!r)return;
+  if(r.status!=="review"){ toast("الإعادة متاحة فقط في مرحلة الدراسة","err"); return; }
+  _returnId=id;
+  document.getElementById("returnReason").value="";
+  document.getElementById("returnOverlay").classList.add("show");
+  setTimeout(()=>document.getElementById("returnReason").focus(),100);
+}
+function closeReturnModal(){
+  document.getElementById("returnOverlay").classList.remove("show");
+  _returnId=null;
+}
+function confirmReturn(){
+  if(!_returnId)return;
+  const r=STATE.requests.find(x=>x.id===_returnId); if(!r)return;
+  const reason=document.getElementById("returnReason").value.trim();
+  if(!reason){ toast("الرجاء كتابة النواقص المطلوبة","err"); return; }
+  r.status="returned";
+  r.note=reason;              // النواقص المطلوبة (تظهر للمستخدم)
+  r.completion=null;          // يلغي الاستكمال السابق ليعيد رفعه
+  saveRequests(); updateSheetStatus(r);
+  closeReturnModal();
+  renderAdminTable(); renderAdminKpis();
+  toast("↩️ تم إرجاع الطلب لاستكمال النواقص","ok");
+}
+
 /* ===== استكمال الطلب (User Step 2) ===== */
 let _completeId=null;
 // المستندات المطلوبة في الاستكمال (كلها إجبارية)
@@ -2191,7 +2253,7 @@ function buildCompletionDocs(){
 
 function openCompleteModal(id){
   const r=STATE.requests.find(x=>x.id===id); if(!r)return;
-  if(r.status!=="preliminary"){ toast("الطلب ليس في مرحلة الاستكمال","err"); return; }
+  if(r.status!=="preliminary"&&r.status!=="returned"){ toast("الطلب ليس في مرحلة الاستكمال","err"); return; }
   _completeId=id; _completeFiles={};
   buildCompletionDocs();
   document.getElementById("completeComment").value="";
@@ -2337,6 +2399,10 @@ function viewDetail(id){
     }
     if(r.status!=="disbursed"&&r.status!=="rejected"){
       btns+=`<button class="btn btn-red" onclick="closeDetail();rejectRequest('${r.id}')">✕ رفض</button>`;
+    }
+    // إعادة لاستكمال النواقص (في مرحلة تحت الدراسة فقط)
+    if(r.status==="review"){
+      btns+=`<button class="btn btn-warn" onclick="closeDetail();returnForCompletion('${r.id}')">↩️ إعادة لاستكمال النواقص</button>`;
     }
     btns+=`<button class="btn btn-ghost" onclick="aiEvaluate('${r.id}')">🤖 تقييم ذكي</button>`;
     // تعديل/إضافة رقم الطلب في الصادرات للطلبات التي تجاوزت مرحلة الإرسال
