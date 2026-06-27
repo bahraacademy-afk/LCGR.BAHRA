@@ -1563,6 +1563,7 @@ const I18N = {
   "نموذج الآيبان البنكي للحساب المحوّل منه (مصدّق من البنك)":"Bank IBAN form for the source account (bank-certified)",
   "إثبات التحويل":"Transfer proof",
   "تقرير ما بعد الاستفادة من الخدمة":"Post-service benefit report",
+  "📥 تحميل النموذج الجاهز":"📥 Download Template",
   "إثبات القيام بالخدمة":"Proof of service completion",
   "📤 مستندات الاستكمال":"📤 Completion Documents",
   "رفع المستندات المطلوبة وإضافة تعليق":"Upload required documents & add a comment",
@@ -2232,29 +2233,42 @@ const COMPLETION_DOCS=[
   {k:"invoice",   l:"الفاتورة الأصلية الرسمية للرسوم المدفوعة"},
   {k:"iban",      l:"نموذج الآيبان البنكي للحساب المحوّل منه (مصدّق من البنك)"},
   {k:"transfer",  l:"إثبات التحويل"},
-  {k:"afterReport",l:"تقرير ما بعد الاستفادة من الخدمة"},
+  {k:"afterReport",l:"تقرير ما بعد الاستفادة من الخدمة",
+    // نموذج جاهز للتحميل (حالياً للمعارض الدولية فقط)
+    template:{exhibition:"نموذج_تقرير_المعارض_الدولية.docx"}},
   {k:"proofService",l:"إثبات القيام بالخدمة"}
 ];
 let _completeFiles={};  // {docKey:{name,type,data}}
+let _completeServiceId=null;  // خدمة الطلب الحالي (لاختيار النموذج المناسب)
 
 function buildCompletionDocs(){
   const wrap=document.getElementById("completeDocsWrap");
-  wrap.innerHTML=COMPLETION_DOCS.map(d=>`
+  wrap.innerHTML=COMPLETION_DOCS.map(d=>{
+    // زر تحميل النموذج إن وُجد للخدمة الحالية
+    let tplBtn="";
+    if(d.template && _completeServiceId && d.template[_completeServiceId]){
+      const file=d.template[_completeServiceId];
+      tplBtn=`<a href="${file}" download style="display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#fff;padding:6px 14px;border-radius:8px;text-decoration:none;font-size:.82rem;font-weight:600;margin-bottom:8px">📥 تحميل النموذج الجاهز</a>`;
+    }
+    return `
     <div class="field" style="margin-bottom:14px">
       <label>${d.l} <span class="req">*</span></label>
+      ${tplBtn}
       <div class="file-drop" onclick="document.getElementById('cdoc_${d.k}').click()" style="padding:16px">
         <div class="fi">📎</div>
         <div class="ft">اضغط لرفع ملف (PDF, DOCX, PNG, JPG)</div>
         <div class="fn" id="cdocName_${d.k}" style="color:var(--primary);font-weight:600;margin-top:6px"></div>
       </div>
       <input type="file" id="cdoc_${d.k}" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none" onchange="onCompleteDocFile('${d.k}')">
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 function openCompleteModal(id){
   const r=STATE.requests.find(x=>x.id===id); if(!r)return;
   if(r.status!=="preliminary"&&r.status!=="returned"){ toast("الطلب ليس في مرحلة الاستكمال","err"); return; }
   _completeId=id; _completeFiles={};
+  _completeServiceId=r.serviceId||null;
   buildCompletionDocs();
   document.getElementById("completeComment").value="";
   document.getElementById("completeSub").textContent=r.serviceName+" — "+r.refNo;
