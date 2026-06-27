@@ -256,6 +256,60 @@ html{scroll-behavior:smooth}
   *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 
+/* ═══ طبقة انميشن احترافية متناسقة ═══ */
+/* انتقال لوني سلس عند تبديل الثيم */
+body,.svc-card,.kpi-card,.glass-card,.btn,.nav-item,.badge,header,.sidebar,
+.modal,.dash-card,.act-btn,thead th,.seg-btn,.theme-chip,.search-box,
+input,select,textarea,.user-chip,.icon-btn{
+  transition:background-color .55s cubic-bezier(.4,0,.2,1),
+             border-color .55s cubic-bezier(.4,0,.2,1),
+             color .45s cubic-bezier(.4,0,.2,1),
+             box-shadow .45s cubic-bezier(.4,0,.2,1);
+}
+/* وميض لطيف يعمّ الموقع عند تغيير الثيم */
+@keyframes themeFlash{0%{opacity:0}25%{opacity:.06}100%{opacity:0}}
+.theme-flash{position:fixed;inset:0;background:var(--primary);pointer-events:none;z-index:99999;animation:themeFlash .6s ease-out}
+
+/* دخول العناصر بتناسق (cascade) */
+@keyframes fadeRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeScale{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* تأثير نبض على الثيم المختار */
+@keyframes chipPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+.theme-chip.active .theme-dot{animation:chipPop .5s cubic-bezier(.34,1.56,.64,1)}
+
+/* لمعان متحرك يمر على الأزرار الرئيسية عند المرور */
+.btn-primary,.svc-btn{position:relative;overflow:hidden}
+.btn-primary::before,.svc-btn::before{content:"";position:absolute;top:0;left:-120%;width:80%;height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .6s ease}
+.btn-primary:hover::before,.svc-btn:hover::before{left:120%}
+
+/* حركة ناعمة لأيقونة الإعدادات */
+.icon-btn span{display:inline-block;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.icon-btn:hover span{transform:rotate(180deg)}
+
+/* تموّج البطاقات عند الظهور بتناسق متدرّج */
+.kpi-grid>*{animation:fadeRise .6s cubic-bezier(.16,1,.3,1) both}
+.kpi-grid>*:nth-child(1){animation-delay:.06s}
+.kpi-grid>*:nth-child(2){animation-delay:.14s}
+.kpi-grid>*:nth-child(3){animation-delay:.22s}
+.kpi-grid>*:nth-child(4){animation-delay:.30s}
+
+/* عناصر القائمة الجانبية تدخل بتتابع */
+.nav-item{animation:slideInRight .5s cubic-bezier(.16,1,.3,1) both}
+.nav-item:nth-child(1){animation-delay:.04s}
+.nav-item:nth-child(2){animation-delay:.10s}
+.nav-item:nth-child(3){animation-delay:.16s}
+.nav-item:nth-child(4){animation-delay:.22s}
+.nav-item:nth-child(5){animation-delay:.28s}
+
+/* نعومة عامة للتفاعلات */
+.svc-card:active,.kpi-card:active,.btn:active{transform:scale(.98)}
+.badge{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+tbody tr{transition:background .3s,transform .3s}
+tbody tr:hover{transform:translateX(-3px)}
+
 .page-head{margin-bottom:26px}
 .page-head h1{font-size:1.75rem;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
 .page-head p{color:var(--text-soft);margin-top:6px}
@@ -1569,15 +1623,22 @@ function toggleTheme(){applyTheme(STATE.theme==="dark"?"light":"dark");}
 // الثيمات: لون أساسي + مشتقاته
 const THEMES=[
   {id:"teal",   name:"الهوية المعتمدة", primary:"#0d9488", dark:"#0a6e66", light:"#d5f3ef", accent:"#2dd4bf"},
-  {id:"emerald",name:"المضمار الأخضر",  primary:"#059669", dark:"#047857", light:"#d1fae5", accent:"#34d399"},
-  {id:"gold",   name:"الفخم الذهبي",   primary:"#b8860b", dark:"#946c08", light:"#faf0d0", accent:"#e0b84c"},
-  {id:"blue",   name:"المحيط الأزرق",  primary:"#2563eb", dark:"#1d4ed8", light:"#dbeafe", accent:"#60a5fa"},
-  {id:"purple", name:"الأرجوانية",     primary:"#7c3aed", dark:"#6d28d9", light:"#ede9fe", accent:"#a78bfa"},
-  {id:"rose",   name:"الوردي الراقي",  primary:"#e11d48", dark:"#be123c", light:"#ffe4e9", accent:"#fb7185"}
+  {id:"deepsea",name:"الأزرق العميق",   primary:"#0e7490", dark:"#155e75", light:"#cff2fb", accent:"#22d3ee"},
+  {id:"forest", name:"الزمردي الفاخر",  primary:"#047857", dark:"#065f46", light:"#cdf5e4", accent:"#10b981"},
+  {id:"royal",  name:"الكحلي الملكي",   primary:"#1e3a8a", dark:"#172554", light:"#dde6fb", accent:"#3b82f6"},
+  {id:"bronze", name:"الذهبي الراقي",   primary:"#a16207", dark:"#854d0e", light:"#fbf0d2", accent:"#d4a017"},
+  {id:"plum",   name:"النبيتي الأنيق",  primary:"#9d174d", dark:"#831843", light:"#fbdce8", accent:"#db2777"}
 ];
 
 function applyThemeColor(themeId){
   const t=THEMES.find(x=>x.id===themeId)||THEMES[0];
+  // وميض لطيف يعمّ الشاشة
+  const flash=document.createElement("div");
+  flash.className="theme-flash";
+  flash.style.background=t.primary;
+  document.body.appendChild(flash);
+  setTimeout(()=>flash.remove(),600);
+
   const r=document.documentElement.style;
   r.setProperty("--primary",t.primary);
   r.setProperty("--primary-dark",t.dark);
@@ -1779,9 +1840,9 @@ const I18N = {
   "افتراضي":"Default","كايرو":"Cairo","طجوال":"Tajawal",
   "☀️ نهاري":"☀️ Light","🌙 ليلي":"🌙 Dark",
   "↻ استعادة الافتراضي":"↻ Reset to Default",
-  "الهوية المعتمدة":"Official Brand","المضمار الأخضر":"Green Field",
-  "الفخم الذهبي":"Luxury Gold","المحيط الأزرق":"Ocean Blue",
-  "الأرجوانية":"Purple","الوردي الراقي":"Elegant Rose",
+  "الهوية المعتمدة":"Official Brand","الأزرق العميق":"Deep Sea",
+  "الزمردي الفاخر":"Luxe Emerald","الكحلي الملكي":"Royal Navy",
+  "الذهبي الراقي":"Elegant Gold","النبيتي الأنيق":"Refined Plum",
   "الأنشطة المشمولة":"Included Activities",
   "الكل":"All",
   "رقم الطلب في الصادرات":"Exports Request Number",
