@@ -309,7 +309,14 @@ html{scroll-behavior:smooth}
 .search-box input{padding:10px 38px 10px 14px;border:1px solid var(--glass-border);border-radius:12px;background:var(--card);color:var(--text);font-family:inherit;width:220px;transition:.2s;box-shadow:0 2px 8px rgba(13,148,136,.06)}
 .search-box input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
 .search-box span{position:absolute;right:12px;top:10px;color:var(--text-soft)}
-.tbl-wrap{overflow-x:auto}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* تثبيت آخر عمود (الإجراء) ليبقى ظاهراً دائماً */
+.tbl-wrap table{min-width:100%}
+.tbl-wrap th:last-child,.tbl-wrap td:last-child{position:sticky;left:0;background:var(--card);z-index:2;box-shadow:2px 0 6px rgba(0,0,0,.06)}
+.tbl-wrap thead th:last-child{background:var(--primary-light);z-index:3}
+/* أزرار الإجراءات في الجدول: أصغر وملتفّة */
+.tbl-wrap td:last-child{white-space:nowrap}
+.act-btn{padding:6px 10px;font-size:.8rem;margin:2px}
 table{width:100%;border-collapse:collapse;font-size:.88rem;white-space:nowrap}
 thead th{background:var(--primary-light);color:var(--primary);padding:14px 16px;text-align:right;font-weight:800;position:sticky;top:0}
 tbody td{padding:13px 16px;border-bottom:1px solid var(--border)}
@@ -354,9 +361,10 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .modal-foot{padding:20px 28px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start;flex-wrap:wrap}
 .modal-foot .btn{flex:0 1 auto;white-space:nowrap}
 /* فوتر تفاصيل الطلب: أزرار مرتبة في شبكة منظّمة */
-#detailFoot{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-#detailFoot .btn{width:100%;justify-content:center;white-space:nowrap;font-size:.9rem;padding:11px 14px}
-@media(max-width:560px){#detailFoot{grid-template-columns:repeat(2,1fr)}}
+#detailFoot{display:flex;flex-wrap:wrap;gap:8px;padding:18px 24px;justify-content:flex-start}
+#detailFoot .btn{flex:1 1 auto;min-width:120px;max-width:calc(33.333% - 8px);justify-content:center;white-space:nowrap;font-size:.88rem;padding:11px 12px}
+@media(max-width:640px){#detailFoot .btn{max-width:calc(50% - 8px)}}
+@media(max-width:420px){#detailFoot .btn{max-width:100%}}
 #formOverlay .modal-head{padding:30px 46px}
 #formOverlay .modal-head .ti h2{font-size:1.6rem}
 #formOverlay .modal-head .ti p{font-size:.95rem}
@@ -2093,14 +2101,16 @@ function uploadAttachments(fileList, refNo, done){
 // ترتيب الطلبات: الجديد → القديم (حسب التاريخ ثم الرقم التسلسلي)
 function fmtDate(d){
   if(!d) return "-";
-  // ناخذ أول 10 أحرف (YYYY-MM-DD) من أي صيغة تاريخ
-  const s=String(d);
-  // لو فيه T (صيغة ISO كاملة) أو وقت، ناخذ التاريخ فقط
-  const m=s.match(/^(\d{4}-\d{2}-\d{2})/);
-  if(m) return m[1];
-  // لو تاريخ بصيغة ثانية، نحاول نحوّله
+  const s=String(d).trim();
+  // صيغة ISO كاملة: ناخذ أول 10 أحرف YYYY-MM-DD
+  let m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[1]+"-"+m[2]+"-"+m[3];
+  // صيغة فيها T بس ناقصة: نحاول Date parse
   const dt=new Date(s);
   if(!isNaN(dt.getTime())) return dt.toISOString().slice(0,10);
+  // احتياطي: نشيل أي جزء بعد T
+  const tIdx=s.indexOf("T");
+  if(tIdx>0) return s.slice(0,tIdx);
   return s.slice(0,10);
 }
 function sortNewestFirst(arr){
