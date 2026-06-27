@@ -35,6 +35,35 @@
   --grad-bg:radial-gradient(1200px 600px at 85% -5%, #a3e6dd 0%, transparent 55%), radial-gradient(1000px 700px at -10% 110%, #b0ece4 0%, transparent 50%), linear-gradient(160deg,#dcf0ed 0%,#eefaf8 100%);
   --blur:30px;
 }
+
+/* ═══ لوحة إعدادات المظهر ═══ */
+.settings-scrim{position:fixed;inset:0;background:rgba(10,42,40,.4);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:.35s;z-index:998}
+.settings-scrim.show{opacity:1;visibility:visible}
+.settings-drawer{position:fixed;top:0;right:0;height:100%;width:380px;max-width:90vw;background:var(--card-solid);box-shadow:-12px 0 40px rgba(13,148,136,.18);z-index:999;transform:translateX(100%);transition:transform .42s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;overflow:hidden}
+.settings-drawer.show{transform:translateX(0)}
+.sd-head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;background:var(--grad-primary);color:#fff;flex-shrink:0}
+.sd-head h2{font-size:1.2rem;font-weight:800;margin:0}
+.sd-close{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:1rem;cursor:pointer;transition:.25s;display:flex;align-items:center;justify-content:center}
+.sd-close:hover{background:rgba(255,255,255,.35);transform:rotate(90deg)}
+.sd-body{padding:24px;overflow-y:auto;flex:1}
+.sd-section{margin-bottom:28px}
+.sd-label{font-weight:800;color:var(--text);font-size:.98rem;margin-bottom:14px}
+/* شبكة الثيمات */
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.theme-chip{position:relative;border:2.5px solid var(--border);border-radius:14px;padding:12px 8px;cursor:pointer;background:var(--bg2);transition:.28s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.theme-chip:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(13,148,136,.18)}
+.theme-chip.active{border-color:var(--tc);box-shadow:0 6px 18px var(--tc-shadow)}
+.theme-chip.active::after{content:"✓";position:absolute;top:5px;left:7px;color:var(--tc);font-weight:900;font-size:.85rem}
+.theme-dot{width:34px;height:34px;border-radius:50%;background:var(--tc);box-shadow:0 3px 10px var(--tc-shadow)}
+.theme-name{font-size:.76rem;font-weight:700;color:var(--text-soft);line-height:1.2}
+/* أزرار التقسيم */
+.seg-group{display:flex;gap:8px;background:var(--bg2);padding:5px;border-radius:14px}
+.seg-btn{flex:1;padding:10px 8px;border:none;background:transparent;border-radius:10px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:700;color:var(--text-soft);transition:.26s cubic-bezier(.16,1,.3,1)}
+.seg-btn:hover{color:var(--primary)}
+.seg-btn.active{background:var(--card-solid);color:var(--primary);box-shadow:0 3px 10px rgba(13,148,136,.16)}
+.sd-reset{width:100%;padding:13px;border:1.5px dashed var(--border);background:transparent;border-radius:12px;cursor:pointer;font-family:inherit;font-weight:700;color:var(--text-soft);transition:.25s;margin-top:8px}
+.sd-reset:hover{border-color:var(--red);color:var(--red);background:rgba(226,35,26,.05)}
+@media(max-width:480px){.settings-drawer{width:100%;max-width:100%}}
 [data-theme="dark"]{
   --primary:#4ee6cb;
   --primary-dark:#34d3b8;
@@ -701,6 +730,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
     <div class="name">دعم <span>الحوافز</span></div>
   </div>
   <div class="top-actions">
+    <button class="icon-btn" onclick="openSettings()" title="إعدادات المظهر"><span>⚙️</span></button>
     <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي/النهاري"><span id="themeIcon">🌙</span></button>
     <button class="icon-btn" onclick="toggleLang()" title="اللغة"><span id="langIcon">EN</span></button>
     <div class="user-chip" onclick="showUserMenu()" title="الحساب">
@@ -950,6 +980,50 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 </div>
 
 <!-- مودال إعادة الطلب لاستكمال النواقص -->
+<!-- ═══ لوحة إعدادات المظهر (Drawer) ═══ -->
+<div class="settings-scrim" id="settingsScrim" onclick="closeSettings()"></div>
+<aside class="settings-drawer" id="settingsDrawer">
+  <div class="sd-head">
+    <h2>⚙️ إعدادات المظهر</h2>
+    <button class="sd-close" onclick="closeSettings()">✕</button>
+  </div>
+  <div class="sd-body">
+    <!-- الثيمات -->
+    <div class="sd-section">
+      <div class="sd-label">🎨 لون الهوية</div>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+    <!-- حجم العرض -->
+    <div class="sd-section">
+      <div class="sd-label">📏 حجم العرض</div>
+      <div class="seg-group" id="sizeGroup">
+        <button class="seg-btn" data-size="sm" onclick="setUISize('sm')">صغير</button>
+        <button class="seg-btn active" data-size="md" onclick="setUISize('md')">عادي</button>
+        <button class="seg-btn" data-size="lg" onclick="setUISize('lg')">كبير</button>
+      </div>
+    </div>
+    <!-- نمط الخط -->
+    <div class="sd-section">
+      <div class="sd-label">✍️ نمط الخط</div>
+      <div class="seg-group" id="fontGroup">
+        <button class="seg-btn active" data-font="default" onclick="setUIFont('default')">افتراضي</button>
+        <button class="seg-btn" data-font="cairo" onclick="setUIFont('cairo')">كايرو</button>
+        <button class="seg-btn" data-font="tajawal" onclick="setUIFont('tajawal')">طجوال</button>
+      </div>
+    </div>
+    <!-- الوضع -->
+    <div class="sd-section">
+      <div class="sd-label">🌓 الوضع</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="modeLightBtn" onclick="applyTheme('light');syncSettingsUI()">☀️ نهاري</button>
+        <button class="seg-btn" id="modeDarkBtn" onclick="applyTheme('dark');syncSettingsUI()">🌙 ليلي</button>
+      </div>
+    </div>
+    <!-- إعادة تعيين -->
+    <button class="sd-reset" onclick="resetSettings()">↻ استعادة الافتراضي</button>
+  </div>
+</aside>
+
 <div class="overlay" id="returnOverlay">
   <div class="modal" style="max-width:480px">
     <div class="modal-head">
@@ -1349,6 +1423,7 @@ function init(){
   // الثيم المحفوظ
   const savedTheme=getLS("ed_theme")||"light";
   applyTheme(savedTheme);
+  loadSavedSettings();
   // إخفاء السبلاش فوراً
   const sp=document.getElementById("splash");
   if(sp) sp.style.display="none";
@@ -1490,6 +1565,99 @@ function applyTheme(t){
 }
 function toggleTheme(){applyTheme(STATE.theme==="dark"?"light":"dark");}
 
+/* ═══════════ نظام إعدادات المظهر ═══════════ */
+// الثيمات: لون أساسي + مشتقاته
+const THEMES=[
+  {id:"teal",   name:"الهوية المعتمدة", primary:"#0d9488", dark:"#0a6e66", light:"#d5f3ef", accent:"#2dd4bf"},
+  {id:"emerald",name:"المضمار الأخضر",  primary:"#059669", dark:"#047857", light:"#d1fae5", accent:"#34d399"},
+  {id:"gold",   name:"الفخم الذهبي",   primary:"#b8860b", dark:"#946c08", light:"#faf0d0", accent:"#e0b84c"},
+  {id:"blue",   name:"المحيط الأزرق",  primary:"#2563eb", dark:"#1d4ed8", light:"#dbeafe", accent:"#60a5fa"},
+  {id:"purple", name:"الأرجوانية",     primary:"#7c3aed", dark:"#6d28d9", light:"#ede9fe", accent:"#a78bfa"},
+  {id:"rose",   name:"الوردي الراقي",  primary:"#e11d48", dark:"#be123c", light:"#ffe4e9", accent:"#fb7185"}
+];
+
+function applyThemeColor(themeId){
+  const t=THEMES.find(x=>x.id===themeId)||THEMES[0];
+  const r=document.documentElement.style;
+  r.setProperty("--primary",t.primary);
+  r.setProperty("--primary-dark",t.dark);
+  r.setProperty("--primary-light",t.light);
+  r.setProperty("--accent",t.accent);
+  r.setProperty("--accent2",t.primary);
+  r.setProperty("--grad-primary",`linear-gradient(135deg,${t.primary} 0%,${t.accent} 100%)`);
+  r.setProperty("--grad-accent",`linear-gradient(135deg,${t.accent} 0%,${t.primary} 100%)`);
+  STATE.themeColor=themeId;
+  setLS("ed_theme_color",themeId);
+  buildThemeGrid();
+}
+
+function buildThemeGrid(){
+  const grid=document.getElementById("themeGrid"); if(!grid)return;
+  grid.innerHTML=THEMES.map(t=>{
+    const active=(STATE.themeColor||"teal")===t.id;
+    return `<div class="theme-chip ${active?"active":""}" style="--tc:${t.primary};--tc-shadow:${t.primary}55" onclick="applyThemeColor('${t.id}')">
+      <div class="theme-dot"></div>
+      <div class="theme-name">${t.name}</div>
+    </div>`;
+  }).join("");
+}
+
+// حجم العرض
+function setUISize(size){
+  const scale={sm:.92,md:1,lg:1.1}[size]||1;
+  document.documentElement.style.fontSize=(16*scale)+"px";
+  STATE.uiSize=size; setLS("ed_ui_size",size);
+  document.querySelectorAll("#sizeGroup .seg-btn").forEach(b=>b.classList.toggle("active",b.dataset.size===size));
+}
+
+// نمط الخط
+const FONTS={
+  default:'"Segoe UI",Tahoma,system-ui,-apple-system,sans-serif',
+  cairo:'"Cairo","Segoe UI",sans-serif',
+  tajawal:'"Tajawal","Segoe UI",sans-serif'
+};
+function setUIFont(font){
+  // تحميل خط جوجل عند الحاجة
+  if((font==="cairo"||font==="tajawal") && !document.getElementById("gfont-"+font)){
+    const link=document.createElement("link");
+    link.id="gfont-"+font; link.rel="stylesheet";
+    const fam=font==="cairo"?"Cairo:wght@400;600;700;800":"Tajawal:wght@400;500;700;800";
+    link.href="https://fonts.googleapis.com/css2?family="+fam+"&display=swap";
+    document.head.appendChild(link);
+  }
+  document.body.style.fontFamily=FONTS[font]||FONTS.default;
+  STATE.uiFont=font; setLS("ed_ui_font",font);
+  document.querySelectorAll("#fontGroup .seg-btn").forEach(b=>b.classList.toggle("active",b.dataset.font===font));
+}
+
+// فتح/إغلاق اللوحة
+function openSettings(){
+  buildThemeGrid(); syncSettingsUI();
+  document.getElementById("settingsScrim").classList.add("show");
+  document.getElementById("settingsDrawer").classList.add("show");
+}
+function closeSettings(){
+  document.getElementById("settingsScrim").classList.remove("show");
+  document.getElementById("settingsDrawer").classList.remove("show");
+}
+function syncSettingsUI(){
+  document.querySelectorAll("#sizeGroup .seg-btn").forEach(b=>b.classList.toggle("active",b.dataset.size===(STATE.uiSize||"md")));
+  document.querySelectorAll("#fontGroup .seg-btn").forEach(b=>b.classList.toggle("active",b.dataset.font===(STATE.uiFont||"default")));
+  const lb=document.getElementById("modeLightBtn"),db=document.getElementById("modeDarkBtn");
+  if(lb&&db){ lb.classList.toggle("active",STATE.theme!=="dark"); db.classList.toggle("active",STATE.theme==="dark"); }
+}
+function resetSettings(){
+  applyThemeColor("teal"); setUISize("md"); setUIFont("default"); applyTheme("light");
+  syncSettingsUI(); toast("✓ تمت استعادة الإعدادات الافتراضية","ok");
+}
+// تطبيق الإعدادات المحفوظة عند التحميل
+function loadSavedSettings(){
+  const c=getLS("ed_theme_color"); if(c)applyThemeColor(c); else buildThemeGrid();
+  const s=getLS("ed_ui_size"); if(s)setUISize(s);
+  const f=getLS("ed_ui_font"); if(f)setUIFont(f);
+}
+
+
 /* ============ نظام الترجمة الكامل ============ */
 /* ============ قاموس الترجمة عربي ↔ إنجليزي ============ */
 const I18N = {
@@ -1602,6 +1770,18 @@ const I18N = {
   "📤 رفع الطلب للصادرات":"📤 Submit to Exports",
   "أدخل رقم الطلب في الصادرات":"Enter the Exports request number",
   "المرجع الداخلي للمنصة:":"Internal Platform Reference:",
+  "⚙️ إعدادات المظهر":"⚙️ Appearance Settings",
+  "🎨 لون الهوية":"🎨 Brand Color",
+  "📏 حجم العرض":"📏 Display Size",
+  "✍️ نمط الخط":"✍️ Font Style",
+  "🌓 الوضع":"🌓 Mode",
+  "صغير":"Small","عادي":"Normal","كبير":"Large",
+  "افتراضي":"Default","كايرو":"Cairo","طجوال":"Tajawal",
+  "☀️ نهاري":"☀️ Light","🌙 ليلي":"🌙 Dark",
+  "↻ استعادة الافتراضي":"↻ Reset to Default",
+  "الهوية المعتمدة":"Official Brand","المضمار الأخضر":"Green Field",
+  "الفخم الذهبي":"Luxury Gold","المحيط الأزرق":"Ocean Blue",
+  "الأرجوانية":"Purple","الوردي الراقي":"Elegant Rose",
   "الأنشطة المشمولة":"Included Activities",
   "الكل":"All",
   "رقم الطلب في الصادرات":"Exports Request Number",
