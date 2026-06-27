@@ -156,9 +156,76 @@ header{
 .nav-label{font-size:.72rem;color:var(--text-soft);padding:0 14px;margin:8px 0;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
 
 main{flex:1;padding:32px;overflow-x:hidden}
-.page{display:none;animation:slideUp .5s cubic-bezier(.2,.8,.2,1)}
+.page{display:none;animation:pageIn .55s cubic-bezier(.16,1,.3,1)}
 .page.active{display:block}
 @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pageIn{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ===== انميشن تجميلية إضافية ===== */
+/* ظهور متدرّج للبطاقات (stagger) */
+@keyframes cardRise{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.page.active .svc-card{animation:cardRise .55s cubic-bezier(.16,1,.3,1) both}
+.page.active .svc-card:nth-child(1){animation-delay:.05s}
+.page.active .svc-card:nth-child(2){animation-delay:.12s}
+.page.active .svc-card:nth-child(3){animation-delay:.19s}
+.page.active .svc-card:nth-child(4){animation-delay:.26s}
+.page.active .svc-card:nth-child(5){animation-delay:.33s}
+.page.active .svc-card:nth-child(6){animation-delay:.40s}
+.page.active .svc-card:nth-child(n+7){animation-delay:.45s}
+
+/* ظهور متدرّج للـ KPI */
+.page.active .kpi-card{animation:cardRise .5s cubic-bezier(.16,1,.3,1) both}
+.page.active .kpi-card:nth-child(1){animation-delay:.04s}
+.page.active .kpi-card:nth-child(2){animation-delay:.10s}
+.page.active .kpi-card:nth-child(3){animation-delay:.16s}
+.page.active .kpi-card:nth-child(4){animation-delay:.22s}
+
+/* تأثير موجة (ripple) للأزرار */
+.svc-btn,.btn-primary,.act-btn,.nav-item{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);transform:scale(0);animation:rippleEffect .6s ease-out;pointer-events:none}
+@keyframes rippleEffect{to{transform:scale(2.5);opacity:0}}
+
+/* انميشن عناصر القائمة الجانبية */
+.nav-item{transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .25s,color .25s,box-shadow .25s}
+.nav-item:hover{transform:translateX(-6px) scale(1.02)}
+.nav-item .ni-ic{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.nav-item:hover .ni-ic{transform:scale(1.2) rotate(-5deg)}
+
+/* تأثير لمعان على البطاقات عند المرور */
+.svc-card,.kpi-card,.glass-card{transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s,border-color .3s}
+.kpi-card:hover{transform:translateY(-8px) scale(1.03)}
+
+/* وميض ناعم للأرقام عند التحديث */
+@keyframes numPulse{0%{transform:scale(1)}40%{transform:scale(1.12);color:var(--primary)}100%{transform:scale(1)}}
+.num-pulse{animation:numPulse .6s ease-out}
+
+/* تأثير الظهور عند السكرول */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+/* سكرول ناعم */
+html{scroll-behavior:smooth}
+
+/* تأثير نبض لطيف على زر المساعد الذكي */
+@keyframes botPulse{0%,100%{box-shadow:0 8px 24px rgba(13,148,136,.4),0 0 0 0 rgba(13,148,136,.4)}50%{box-shadow:0 8px 24px rgba(13,148,136,.4),0 0 0 12px rgba(13,148,136,0)}}
+.ai-chat-fab{animation:botPulse 2.6s infinite}
+
+/* لمعان متحرك على الشعار */
+.brand img{transition:transform .4s cubic-bezier(.34,1.56,.64,1),filter .4s}
+.brand img:hover{transform:scale(1.08) rotate(-2deg)}
+
+/* تأثير تموّج خفيف على عناوين الصفحات */
+.page-head h1{animation:titleSlide .6s cubic-bezier(.16,1,.3,1) both}
+@keyframes titleSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* انتقال ناعم للأزرار الأيقونية */
+.icon-btn{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,color .3s,background .3s}
+.icon-btn:hover{transform:translateY(-3px) scale(1.08) rotate(8deg)}
+
+/* تقليل الحركة لمن يفضّل ذلك (إتاحة) */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
 
 .page-head{margin-bottom:26px}
 .page-head h1{font-size:1.75rem;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
@@ -829,11 +896,11 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
   </div>
 </div>
 
-<!-- مودال رفع الطلب للوزارة (إدخال رقم الوزارة) -->
+<!-- مودال رفع الطلب للصادرات (إدخال رقم الطلب في الصادرات) -->
 <div class="overlay" id="ministryOverlay">
   <div class="modal" style="max-width:520px">
     <div class="modal-head">
-      <div class="ti"><h2>📤 رفع الطلب للوزارة</h2><p>أدخل رقم الطلب الصادر من الوزارة</p></div>
+      <div class="ti"><h2>📤 رفع الطلب للصادرات</h2><p>أدخل رقم الطلب في الصادرات</p></div>
       <button class="close-x" onclick="closeMinistryModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -842,13 +909,13 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
         <b id="ministryReqRef" style="color:var(--primary)">—</b>
       </div>
       <div class="field">
-        <label>رقم طلب الوزارة <span class="req">*</span></label>
-        <input type="text" id="ministryRefInput" placeholder="مثال: 1806328 أو الرقم الرسمي من الوزارة">
+        <label>رقم الطلب في الصادرات <span class="req">*</span></label>
+        <input type="text" id="ministryRefInput" placeholder="مثال: 1806328 أو الرقم الرسمي في الصادرات">
         <p style="font-size:.82rem;color:var(--muted);margin-top:8px">هذا الرقم الذي يصدر من بوابة الصادرات بعد رفع الطلب رسمياً</p>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-primary" onclick="confirmMinistry()">✓ تأكيد الرفع للوزارة</button>
+      <button class="btn btn-primary" onclick="confirmMinistry()">✓ تأكيد الرفع للصادرات</button>
       <button class="btn btn-ghost" onclick="closeMinistryModal()">إلغاء</button>
     </div>
   </div>
@@ -995,7 +1062,7 @@ const SAUDI_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdoAAAE/CAIAAA
    نوع الحقل: text | number | date | select | textarea | file | email | tel
    ============================================================ */
 // قائمة الشركات الموحّدة
-const COMPANIES = ["BCC","TBS","Bahra Metals","Electric House","أخرى"];
+const COMPANIES = ["Bahra Cables","Bahra TBS","Bahra Metals","Bahra BED","Bahra Schreeder","Bahra Green","FAME","Smart Pipes","Electric House","Power Rack","أخرى"];
 // قائمة الدول الموحّدة
 const COUNTRIES = ["السعودية","الإمارات","الكويت","قطر","البحرين","عمان","مصر","الأردن","العراق","لبنان","المغرب","تونس","الجزائر","السودان","ليبيا","اليمن","سوريا","فلسطين","موريتانيا","الصومال","إثيوبيا","تنزانيا","كينيا","نيجيريا","موزمبيق","ألمانيا","فرنسا","بريطانيا","إيطاليا","إسبانيا","الصين","الهند","تركيا","ماليزيا","إندونيسيا","سنغافورة","اليابان","كوريا الجنوبية","الولايات المتحدة","كندا","البرازيل","المكسيك","أخرى"];
 
@@ -1452,11 +1519,15 @@ const I18N = {
   "اكتب سبب الرفض (اختياري)":"Enter rejection reason (optional)",
   "سبب الرفض":"Rejection Reason",
   "تأكيد الرفض":"Confirm Rejection",
-  "📤 رفع الطلب للوزارة":"📤 Submit to Ministry",
-  "أدخل رقم الطلب الصادر من الوزارة":"Enter the ministry-issued request number",
+  "📤 رفع الطلب للصادرات":"📤 Submit to Exports",
+  "أدخل رقم الطلب في الصادرات":"Enter the Exports request number",
   "المرجع الداخلي للمنصة:":"Internal Platform Reference:",
-  "رقم طلب الوزارة":"Ministry Request Number",
-  "✓ تأكيد الرفع للوزارة":"✓ Confirm Submission to Ministry",
+  "رقم الطلب في الصادرات":"Exports Request Number",
+  "رقم الطلب في الصادرات ":"Exports Request Number ",
+  "إضافة رقم الصادرات":"Add Exports Number",
+  "تعديل رقم الصادرات":"Edit Exports Number",
+  "رقم الطلب في الصادرات":"Exports Request Number",
+  "✓ تأكيد الرفع للصادرات":"✓ Confirm Submission to Exports",
   "استكمال متطلبات الطلب":"Complete Request Requirements",
   "رفع المستندات المطلوبة وإضافة تعليق":"Upload required documents & add a comment",
   "ملاحظة المراجع:":"Reviewer Note:",
@@ -1787,14 +1858,17 @@ function onFile(k){
     r.readAsDataURL(f);
   }
 }
-// كود الشركة من الاسم (BCC/TBS/...)
+// كود الشركة من الاسم (للرقم الداخلي)
 function companyCode(name){
   const map={
-    "BCC":"BCC","TBS":"TBS","Bahra Metals":"BM","Electric House":"EH",
-    "شركة حلول للمحولات والقضبان الكهربائية":"BCC","بحرة للكابلات":"BCC","مجموعة بحرة":"BCC"
+    "Bahra Cables":"BC","Bahra TBS":"TBS","Bahra Metals":"BM","Bahra BED":"BED",
+    "Bahra Schreeder":"BSC","Bahra Green":"BG","FAME":"FAME","Smart Pipes":"SP",
+    "Electric House":"EH","Power Rack":"PR",
+    "BCC":"BC","TBS":"TBS",
+    "شركة حلول للمحولات والقضبان الكهربائية":"BC","بحرة للكابلات":"BC","مجموعة بحرة":"BC"
   };
   if(map[name]) return map[name];
-  // لو شركة "أخرى" مخصصة: ناخذ أول حرفين إنجليزي أو OTH
+  // لو شركة "أخرى" مخصصة: ناخذ أول حروف إنجليزي أو OTH
   const en=(name||"").replace(/[^A-Za-z]/g,"").toUpperCase();
   return en.substring(0,3)||"OTH";
 }
@@ -1933,7 +2007,7 @@ function renderMyRequests(){
     const canComplete=(r.status==="preliminary"&&!r.completion&&r.applicant===STATE.user);
     const completeBtn=canComplete?` <button class="act-btn approve" onclick="openCompleteModal('${r.id}')">📤 استكمال</button>`:"";
     return `<tr>
-      <td><b>${r.refNo}</b>${r.ministryRef?`<br><span style="font-size:.74rem;color:var(--primary)">🏛️ وزارة: ${r.ministryRef}</span>`:""}</td>
+      <td><b>${r.refNo}</b>${r.ministryRef?`<br><span style="font-size:.74rem;color:var(--primary)">🏛️ الصادرات: ${r.ministryRef}</span>`:""}</td>
       <td>${r.serviceName}</td>
       <td>${r.country}</td>
       <td>${fmtMoney(r.amount)}</td>
@@ -1981,7 +2055,7 @@ function renderAdminTable(){
     }
     actionBtns+=`<button class="act-btn" onclick="printRequestReport('${r.id}')">📄</button>`;
     return `<tr>
-      <td><b>${r.refNo}</b>${r.ministryRef?`<br><span style="font-size:.74rem;color:var(--primary)">🏛️ وزارة: ${r.ministryRef}</span>`:""}</td>
+      <td><b>${r.refNo}</b>${r.ministryRef?`<br><span style="font-size:.74rem;color:var(--primary)">🏛️ الصادرات: ${r.ministryRef}</span>`:""}</td>
       <td>${r.applicant}</td>
       <td>${r.serviceName}</td>
       <td>${r.country}</td>
@@ -2032,13 +2106,13 @@ function confirmMinistry(){
   if(!_ministryId)return;
   const r=STATE.requests.find(x=>x.id===_ministryId); if(!r)return;
   const mref=document.getElementById("ministryRefInput").value.trim();
-  if(!mref){ toast("الرجاء إدخال رقم طلب الوزارة","err"); return; }
+  if(!mref){ toast("الرجاء إدخال رقم الطلب في الصادرات","err"); return; }
   r.ministryRef=mref;
   // لو الطلب لا يزال في مرحلة "تم الإرسال" → ننقله لقبول مبدئي (أول رفع للوزارة)
-  let msg="✓ تم تحديث رقم الوزارة: "+mref;
+  let msg="✓ تم تحديث رقم الطلب في الصادرات: "+mref;
   if(r.status==="submitted"){
     r.status="preliminary";
-    msg="✓ تم رفع الطلب للوزارة برقم: "+mref;
+    msg="✓ تم رفع الطلب للصادرات برقم: "+mref;
   }
   saveRequests(); updateSheetStatus(r);
   closeMinistryModal();
@@ -2140,10 +2214,10 @@ function viewDetail(id){
   document.getElementById("detailTitle").textContent=r.serviceName;
   document.getElementById("detailSub").textContent="رقم الطلب: "+r.refNo;
   let html=`<div style="display:grid;gap:14px">`;
-  // رقم الوزارة (إن وُجد)
+  // رقم الطلب في الصادرات (إن وُجد)
   if(r.ministryRef){
     html+=`<div style="background:linear-gradient(135deg,var(--primary-light),transparent);padding:12px 14px;border-radius:12px;border-right:4px solid var(--primary);display:flex;justify-content:space-between;align-items:center">
-      <span style="color:var(--text-soft)">رقم طلب الوزارة</span><b style="color:var(--primary);font-size:1.05rem">${r.ministryRef}</b></div>`;
+      <span style="color:var(--text-soft)">رقم الطلب في الصادرات</span><b style="color:var(--primary);font-size:1.05rem">${r.ministryRef}</b></div>`;
   }
   if(s){
     for(const f of s.fields){
@@ -2194,9 +2268,9 @@ function viewDetail(id){
       btns+=`<button class="btn btn-red" onclick="closeDetail();rejectRequest('${r.id}')">✕ رفض</button>`;
     }
     btns+=`<button class="btn btn-ghost" onclick="aiEvaluate('${r.id}')">🤖 تقييم ذكي</button>`;
-    // تعديل/إضافة رقم الوزارة للطلبات التي تجاوزت مرحلة الإرسال
+    // تعديل/إضافة رقم الطلب في الصادرات للطلبات التي تجاوزت مرحلة الإرسال
     if(r.status!=="submitted"&&r.status!=="rejected"){
-      btns+=`<button class="btn btn-ghost" onclick="closeDetail();showMinistryModal('${r.id}')">🏛️ ${r.ministryRef?"تعديل":"إضافة"} رقم الوزارة</button>`;
+      btns+=`<button class="btn btn-ghost" onclick="closeDetail();showMinistryModal('${r.id}')">🏛️ ${r.ministryRef?"تعديل":"إضافة"} رقم الصادرات</button>`;
     }
     btns+=`<button class="btn btn-ghost" onclick="printRequestReport('${r.id}')">📄 تقرير</button>`;
     btns+=`<button class="btn btn-ghost" onclick="closeDetail()">إغلاق</button>`;
@@ -3035,6 +3109,55 @@ const _origRenderServices=renderServices;
 renderServices=function(){ _origRenderServices(); setTimeout(attachTilt,50); };
 const _origRenderHome=renderHome;
 renderHome=function(){ _origRenderHome(); setTimeout(attachTilt,50); };
+
+/* ===== تأثيرات تجميلية ===== */
+// تأثير الموجة (ripple) عند الضغط على الأزرار
+document.addEventListener("click",function(e){
+  const btn=e.target.closest(".svc-btn,.btn-primary,.act-btn,.nav-item");
+  if(!btn) return;
+  const circle=document.createElement("span");
+  const d=Math.max(btn.clientWidth,btn.clientHeight);
+  const rect=btn.getBoundingClientRect();
+  circle.style.width=circle.style.height=d+"px";
+  circle.style.left=(e.clientX-rect.left-d/2)+"px";
+  circle.style.top=(e.clientY-rect.top-d/2)+"px";
+  circle.className="ripple";
+  const old=btn.querySelector(".ripple"); if(old)old.remove();
+  btn.appendChild(circle);
+  setTimeout(()=>circle.remove(),600);
+});
+
+// عدّ تصاعدي للأرقام (KPI)
+function animateCount(el,target,dur){
+  if(isNaN(target)){el.textContent=target;return;}
+  const start=0,t0=performance.now();
+  function step(now){
+    const p=Math.min((now-t0)/dur,1);
+    const ease=1-Math.pow(1-p,3); // easeOutCubic
+    el.textContent=Math.round(start+(target-start)*ease).toLocaleString("en-US");
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+// نطبّق العدّ على أرقام KPI عند ظهورها
+function runCountAnimations(scope){
+  (scope||document).querySelectorAll(".kpi-val,.dash-kpi-val").forEach(el=>{
+    if(el.dataset.counted)return;
+    const raw=(el.textContent||"").replace(/[^\d]/g,"");
+    const n=parseInt(raw,10);
+    if(!isNaN(n)&&n>0&&n<1e9){el.dataset.counted="1";const suffix=el.textContent.replace(/[\d,]/g,"");animateCount(el,n,900);}
+  });
+}
+
+// كشف العناصر عند السكرول (scroll reveal)
+const _revObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{ if(en.isIntersecting){en.target.classList.add("in");_revObserver.unobserve(en.target);} });
+},{threshold:.12});
+function attachReveal(){
+  document.querySelectorAll(".glass-card:not(.reveal),.dash-card:not(.reveal)").forEach(el=>{
+    el.classList.add("reveal");_revObserver.observe(el);
+  });
+}
 
 /* ===== تشغيل ===== */
 window.addEventListener("DOMContentLoaded",init);
