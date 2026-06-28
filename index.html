@@ -369,6 +369,12 @@ tbody tr:hover{transform:translateX(-3px)}
 .clickable-row:hover td{color:var(--primary-dark)}
 .clickable-row td:last-child:hover *{color:initial}
 .clickable-row:active{transform:scale(.995)}
+/* بطاقات KPI القابلة للضغط */
+.kpi-clickable{cursor:pointer;position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s}
+.kpi-clickable:hover{transform:translateY(-6px) scale(1.02)}
+.kpi-clickable:active{transform:translateY(-2px) scale(.99)}
+.kpi-hint{position:absolute;bottom:10px;right:18px;font-size:.72rem;color:var(--primary);font-weight:700;opacity:0;transform:translateX(8px);transition:.3s}
+.kpi-clickable:hover .kpi-hint{opacity:1;transform:translateX(0)}
 
 .page-head{margin-bottom:26px}
 .page-head h1{font-size:1.75rem;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
@@ -1891,6 +1897,7 @@ const I18N = {
   "📤 رفع الطلب للصادرات":"📤 Submit to Exports",
   "أدخل رقم الطلب في الصادرات":"Enter the Exports request number",
   "المرجع الداخلي للمنصة:":"Internal Platform Reference:",
+  "اضغط للتفاصيل ←":"Click for details →",
   "⚙️ إعدادات المظهر":"⚙️ Appearance Settings",
   "🎨 لون الهوية":"🎨 Brand Color",
   "📏 حجم العرض":"📏 Display Size",
@@ -3015,11 +3022,34 @@ function renderHomeKpis(){
   const approved=all.filter(r=>r.status==="disbursed").length;
   const firstLabel=isAdmin?"إجمالي الطلبات":"طلباتي";
   document.getElementById("homeKpis").innerHTML=`
-    ${kpiHTML("📑",firstLabel,all.length,"b-green")}
-    ${kpiHTML("⏳","قيد المعالجة",pending,"b-gold")}
-    ${kpiHTML("✓","تم صرفها",approved,"b-blue")}
-    ${kpiHTML("📋","الخدمات المتاحة",SERVICES.length,"b-red")}`;
+    ${kpiHTML("📑",firstLabel,all.length,"b-green","gotoRequests('')")}
+    ${kpiHTML("⏳","قيد المعالجة",pending,"b-gold","gotoRequests('pending')")}
+    ${kpiHTML("✓","تم صرفها",approved,"b-blue","gotoRequests('disbursed')")}
+    ${kpiHTML("📋","الخدمات المتاحة",SERVICES.length,"b-red","nav('services')")}`;
   if(STATE.lang==="en") setTimeout(applyTranslation,0);
+}
+// الانتقال لسجل الطلبات مع فلتر حالة محدد
+function gotoRequests(filterType){
+  const isAdmin=STATE.role==="admin"||STATE.role==="reviewer";
+  const page=isAdmin?"admin":"myrequests";
+  nav(page);
+  setTimeout(()=>{
+    // تطبيق الفلتر حسب نوع البطاقة المضغوطة
+    const filterEl=document.getElementById(isAdmin?"adminFilter":"myReqFilter");
+    if(filterType==="pending"){
+      // قيد المعالجة = نعرض submitted (نختار أول حالة معالجة، والمستخدم يقدر يغيّر)
+      if(filterEl){ filterEl.value=""; }
+      // نضع علامة بصرية: نعرض الكل لكن نمرّر للجدول
+    } else if(filterType==="disbursed"){
+      if(filterEl){ filterEl.value="disbursed"; }
+    } else {
+      if(filterEl){ filterEl.value=""; }
+    }
+    if(isAdmin) renderAdminTable(); else renderMyRequests();
+    // تمرير ناعم للجدول
+    const tbl=document.getElementById(isAdmin?"adminTable":"myReqTable");
+    if(tbl) tbl.scrollIntoView({behavior:"smooth",block:"center"});
+  },100);
 }
 function groupCount(fn){
   const m={}; STATE.requests.forEach(r=>{const k=fn(r)||"-";m[k]=(m[k]||0)+1;});
@@ -3047,11 +3077,13 @@ function drawBarChart(elId,data,unit){
 /* ============================================================
    أدوات مساعدة
    ============================================================ */
-function kpiHTML(icon,label,val,cls){
-  return `<div class="kpi-card ${cls}">
+function kpiHTML(icon,label,val,cls,onClick){
+  const clickAttr=onClick?`onclick="${onClick}" style="cursor:pointer" class="kpi-card ${cls} kpi-clickable"`:`class="kpi-card ${cls}"`;
+  return `<div ${clickAttr}>
     <div class="ic">${icon}</div>
     <div class="lbl">${label}</div>
     <div class="val">${val}</div>
+    ${onClick?'<div class="kpi-hint">اضغط للتفاصيل ←</div>':''}
   </div>`;
 }
 function fmtMoney(v){
