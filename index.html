@@ -363,6 +363,12 @@ input,select,textarea,.user-chip,.icon-btn{
 .badge{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 tbody tr{transition:background .3s,transform .3s}
 tbody tr:hover{transform:translateX(-3px)}
+/* الصفوف القابلة للضغط */
+.clickable-row{cursor:pointer}
+.clickable-row:hover{background:var(--primary-light)!important}
+.clickable-row:hover td{color:var(--primary-dark)}
+.clickable-row td:last-child:hover *{color:initial}
+.clickable-row:active{transform:scale(.995)}
 
 .page-head{margin-bottom:26px}
 .page-head h1{font-size:1.75rem;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
@@ -2459,14 +2465,14 @@ function renderMyRequests(){
     const st=STATUS_MAP[r.status]||STATUS_MAP.submitted;
     const canComplete=((r.status==="preliminary"||r.status==="returned")&&r.applicant===STATE.user);
     const completeBtn=canComplete?` <button class="act-btn approve" onclick="openCompleteModal('${r.id}')">${r.status==="returned"?"↩️ استكمال النواقص":"📤 استكمال"}</button>`:"";
-    return `<tr>
+    return `<tr class="clickable-row" onclick="viewDetail('${r.id}')">
       <td><b>${r.refNo}</b>${r.ministryRef?`<br><span style="font-size:.74rem;color:var(--primary)">🏛️ الصادرات: ${r.ministryRef}</span>`:""}</td>
       <td>${r.serviceName}</td>
       <td>${r.country}</td>
       <td>${fmtMoney(r.amount)}</td>
       <td><span class="badge ${st.badge}">${st.label}</span></td>
       <td>${fmtDate(r.date)}</td>
-      <td><button class="act-btn" onclick="viewDetail('${r.id}')">عرض</button>${completeBtn} <button class="act-btn" onclick="printRequestReport('${r.id}')">📄 تقرير</button></td>
+      <td onclick="event.stopPropagation()"><button class="act-btn" onclick="viewDetail('${r.id}')">عرض</button>${completeBtn} <button class="act-btn" onclick="printRequestReport('${r.id}')">📄 تقرير</button></td>
     </tr>`;
   }).join("");
 }
@@ -2537,14 +2543,14 @@ function renderAdminTable(){
       actionBtns+=`<button class="act-btn reject" onclick="rejectRequest('${r.id}')">رفض</button>`;
     }
     actionBtns+=`<button class="act-btn" onclick="printRequestReport('${r.id}')">📄</button>`;
-    return `<tr>
+    return `<tr class="clickable-row" onclick="viewDetail('${r.id}')">
       <td><b>${r.refNo}</b>${r.ministryRef?`<br><span style="font-size:.74rem;color:var(--primary)">🏛️ الصادرات: ${r.ministryRef}</span>`:""}</td>
       <td>${r.applicant}</td>
       <td>${r.serviceName}</td>
       <td>${r.country}</td>
       <td>${fmtMoney(r.amount)}</td>
       <td><span class="badge ${st.badge}">${st.label}</span></td>
-      <td>${actionBtns}</td>
+      <td onclick="event.stopPropagation()">${actionBtns}</td>
     </tr>`;
   }).join("");
 }
