@@ -583,7 +583,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
   bottom:-10%;right:-5%;animation:breathe 11s ease-in-out infinite reverse}
 @keyframes breathe{0%,100%{transform:scale(1) translate(0,0);opacity:.45}50%{transform:scale(1.25) translate(20px,-15px);opacity:.7}}
 /* شبكة ضوئية خفيفة */
-.login-hero .grid-overlay{position:absolute;inset:0;z-index:1;opacity:.14;
+.login-hero .grid-overlay{position:absolute;inset:0;z-index:1;opacity:.14;pointer-events:none;
   background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
   background-size:54px 54px;mask-image:radial-gradient(ellipse 70% 70% at 50% 40%,#000 30%,transparent 75%);
   -webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 40%,#000 30%,transparent 75%);
@@ -602,6 +602,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .hero-shapes .shape:nth-child(4){width:54px;height:54px;top:34%;left:24%;animation:floatRot2 9s ease-in-out infinite}
 @keyframes floatRot1{0%,100%{transform:translate(var(--px),var(--py)) rotate(0deg)}50%{transform:translate(var(--px),calc(var(--py) - 26px)) rotate(8deg)}}
 @keyframes floatRot2{0%,100%{transform:translate(var(--px),var(--py)) rotate(0deg)}50%{transform:translate(var(--px),calc(var(--py) + 22px)) rotate(-6deg)}}
+.hero-orbs{pointer-events:none}
 .hero-orbs span{position:absolute;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);z-index:1;--px:0px;--py:0px;transition:transform .2s ease-out}
 .hero-orbs span:nth-child(1){width:120px;height:120px;top:18%;right:14%;animation:floatYo 7s ease-in-out infinite}
 .hero-orbs span:nth-child(2){width:60px;height:60px;top:60%;right:22%;animation:floatYo 5s ease-in-out infinite}
@@ -640,7 +641,7 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 .hero-bottom{position:relative;z-index:2;font-size:.85rem;opacity:.75}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 /* الجانب الفورم - خلفية زرقاء داكنة فاخرة */
-.login-form-side{width:480px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:40px;position:relative;
+.login-form-side{width:480px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:40px;position:relative;z-index:5;
   background:linear-gradient(160deg,#0a2422 0%,#0d2e2b 100%);overflow:hidden}
 .login-form-side::before{content:"";position:absolute;width:400px;height:400px;border-radius:50%;
   background:radial-gradient(circle,var(--primary) 0%,transparent 70%);filter:blur(80px);opacity:.3;top:20%;left:-30%;animation:breathe 10s ease-in-out infinite}
@@ -3911,35 +3912,32 @@ function attachReveal(){
 
 /* ===== تفاعل الأشكال الهندسية مع الماوس (parallax) ===== */
 (function(){
-  let raf=null,tx=0,ty=0,cx=0,cy=0;
+  let raf=null,tx=0,ty=0,cx=0,cy=0,active=false;
   function onMove(e){
-    const hero=document.querySelector(".login-hero");
-    if(!hero||document.getElementById("loginScreen").style.display==="none")return;
-    const rect=hero.getBoundingClientRect();
-    // موقع الماوس النسبي من مركز الشاشة (-1 إلى 1)
+    const ls=document.getElementById("loginScreen");
+    if(!ls||ls.style.display==="none")return;  // فقط في شاشة الدخول
     tx=(e.clientX/window.innerWidth-0.5)*2;
     ty=(e.clientY/window.innerHeight-0.5)*2;
     if(!raf)raf=requestAnimationFrame(update);
   }
   function update(){
-    // حركة ناعمة (lerp) تتبع الماوس بتأخّر لطيف
-    cx+=(tx-cx)*0.08; cy+=(ty-cy)*0.08;
+    cx+=(tx-cx)*0.06; cy+=(ty-cy)*0.06;
     const shapes=document.querySelectorAll(".hero-shapes .shape");
     shapes.forEach((s,i)=>{
-      const depth=(i+1)*10;  // كل شكل بعمق مختلف
-      s.style.setProperty("--px",(cx*depth)+"px");
-      s.style.setProperty("--py",(cy*depth)+"px");
+      const depth=(i+1)*9;
+      s.style.setProperty("--px",(cx*depth).toFixed(1)+"px");
+      s.style.setProperty("--py",(cy*depth).toFixed(1)+"px");
     });
-    const orbs=document.querySelectorAll(".hero-orbs span");
-    orbs.forEach((o,i)=>{
-      const depth=(i+1)*16;
-      o.style.setProperty("--px",(cx*depth)+"px");
-      o.style.setProperty("--py",(cy*depth)+"px");
-    });
-    if(Math.abs(tx-cx)>0.001||Math.abs(ty-cy)>0.001){ raf=requestAnimationFrame(update); }
+    if(Math.abs(tx-cx)>0.002||Math.abs(ty-cy)>0.002){ raf=requestAnimationFrame(update); }
     else raf=null;
   }
-  window.addEventListener("mousemove",onMove);
+  // throttle بسيط لتقليل اللاق
+  let lastMove=0;
+  window.addEventListener("mousemove",function(e){
+    const now=Date.now();
+    if(now-lastMove<16)return;  // ~60fps كحد أقصى
+    lastMove=now; onMove(e);
+  },{passive:true});
 })();
 
 /* ===== تشغيل ===== */
