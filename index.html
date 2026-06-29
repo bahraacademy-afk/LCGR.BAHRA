@@ -628,9 +628,11 @@ tbody tr:hover{background:var(--primary-light);transform:scale(1.005)}
 /* توهج الخلفية الفرِح */
 .login-hero.hero-happy::before{animation:happyGlow 1s ease-out!important}
 @keyframes happyGlow{0%{opacity:.55;transform:scale(1)}50%{opacity:.9;transform:scale(1.4);background:radial-gradient(circle,#34d399 0%,transparent 70%)}100%{opacity:.55;transform:scale(1)}}
-.hero-top{position:relative;z-index:2;display:flex;align-items:center;gap:14px}
-.hero-top img{height:46px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
-.hero-top .hsep{width:1.5px;height:38px;background:rgba(255,255,255,.4)}
+.hero-top{position:relative;z-index:2;display:flex;align-items:center;gap:18px;
+  background:rgba(255,255,255,.92);padding:14px 22px;border-radius:18px;width:fit-content;
+  box-shadow:0 8px 30px rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.5)}
+.hero-top img{height:64px;width:auto}
+.hero-top .hsep{width:1.5px;height:48px;background:rgba(0,0,0,.15)}
 .hero-mid{position:relative;z-index:2}
 .hero-mid h1{font-size:2.4rem;font-weight:800;line-height:1.3;margin-bottom:16px;animation:fadeUp .8s .2s both}
 .hero-mid p{font-size:1.05rem;opacity:.9;max-width:420px;animation:fadeUp .8s .4s both}
@@ -1656,19 +1658,19 @@ function doLogin(){
 
   // إذا الشيت غير مربوط: وضع تجريبي (أي بيانات تعمل)
   if(SHEET_API.includes("PUT_YOUR")){
-    shapesReact("success");
-    setTimeout(()=>{ loginSuccess(u, STATE.selectedRole); },900);
+    try{shapesReact("success");}catch(e){}
+    setTimeout(()=>{ loginSuccess(u, STATE.selectedRole); },700);
     return;
   }
   // التحقق من الشيت
   jsonp("login",{username:u,password:p},(res)=>{
     if(res&&res.ok&&res.user){
-      shapesReact("success");
-      setTimeout(()=>{ loginSuccess(res.user.name||u, res.user.role||"user"); },900);
+      try{shapesReact("success");}catch(e){}
+      setTimeout(()=>{ loginSuccess(res.user.name||u, res.user.role||"user"); },700);
     } else {
       btn.disabled=false; btn.textContent="دخول →";
       toast(res&&res.error?res.error:"اسم المستخدم أو كلمة المرور غير صحيحة","err");
-      shapesReact("error");
+      try{shapesReact("error");}catch(e){}
     }
   });
 }
