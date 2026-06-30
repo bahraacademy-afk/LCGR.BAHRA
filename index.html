@@ -3834,7 +3834,11 @@ function pushToSheet(req){
   jsonp("add",req,(res)=>{ if(res&&res.ok)console.log("saved to sheet"); });
 }
 function updateSheetStatus(req){
-  jsonp("updateStatus",{id:req.id,refNo:req.refNo,status:req.status,note:req.note,ministryRef:req.ministryRef||""},()=>{});
+  jsonp("updateStatus",{
+    id:req.id, refNo:req.refNo, status:req.status, note:req.note,
+    ministryRef:req.ministryRef||"",
+    completion:req.completion||null    // نرسل مستندات الاستكمال للشيت
+  },()=>{});
 }
 function fetchFromSheet(){
   jsonp("list",{},(res)=>{
