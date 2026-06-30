@@ -99,7 +99,17 @@ body{
   transition:color .3s;
   line-height:1.6;
   min-height:100vh;
+  position:relative;
 }
+/* توهج فاخر ناعm متحرك في خلفية كل الموقع (زي الدخول) */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(600px 500px at 85% 5%, var(--primary-light) 0%, transparent 60%),
+    radial-gradient(500px 500px at 10% 95%, var(--accent) 0%, transparent 65%);
+  opacity:.35;animation:bgBreathe 14s ease-in-out infinite}
+@keyframes bgBreathe{0%,100%{opacity:.28;transform:scale(1)}50%{opacity:.45;transform:scale(1.08)}}
+[data-theme="dark"] body::before{opacity:.22}
+#topbar,#loginScreen,.layout{position:relative;z-index:1}
 ::-webkit-scrollbar{width:9px;height:9px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
@@ -1583,6 +1593,23 @@ const SERVICES = [
       {k:"doc_price",l:"مستندات عروض الأسعار",t:"file",req:true},
       {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
     ]
+  },
+  {
+    id:"exceptional", name:"الدعم الاستثنائي",
+    desc:"دعم استثنائي يُقدّم من الإدارة لحالات خاصة خارج نطاق الخدمات الاعتيادية.",
+    icon:"⭐", code:"EXCP", adminOnly:true,
+    fields:[
+      {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
+      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
+      {k:"support_reason",l:"سبب الدعم الاستثنائي",t:"textarea",req:true},
+      {k:"price_offer",l:"مبلغ الدعم المطلوب (ر.س)",t:"number",req:true},
+      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة (ر.س)",t:"number",req:false},
+      {k:"start_date",l:"تاريخ بداية الاستفادة",t:"date",req:true},
+      {k:"end_date",l:"تاريخ الانتهاء",t:"date",req:false},
+      {k:"desc",l:"تفاصيل إضافية",t:"textarea",req:false},
+      {k:"doc_justification",l:"مستندات التبرير",t:"file",req:true},
+      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
+    ]
   }
 ];
 
@@ -2002,6 +2029,12 @@ const I18N = {
   "📤 رفع الطلب للصادرات":"📤 Submit to Exports",
   "أدخل رقم الطلب في الصادرات":"Enter the Exports request number",
   "المرجع الداخلي للمنصة:":"Internal Platform Reference:",
+  "الدعم الاستثنائي":"Exceptional Support",
+  "دعم استثنائي يُقدّم من الإدارة لحالات خاصة خارج نطاق الخدمات الاعتيادية.":"Exceptional support provided by management for special cases beyond standard services.",
+  "سبب الدعم الاستثنائي":"Reason for Exceptional Support",
+  "مبلغ الدعم المطلوب (ر.س)":"Requested Support Amount (SAR)",
+  "مستندات التبرير":"Justification Documents",
+  "طلب استثنائي":"exceptional requests",
   "اضغط للتفاصيل ←":"Click for details →",
   "⚙️ إعدادات المظهر":"⚙️ Appearance Settings",
   "🎨 لون الهوية":"🎨 Brand Color",
@@ -2261,12 +2294,17 @@ function svcCardHTML(s){
     <button class="svc-btn" onclick="openForm('${s.id}')">بدء الخدمة <span>←</span></button>
   </div>`;
 }
+function visibleServices(){
+  // الدعم الاستثنائي يظهر فقط للأدمن والمراجع
+  const isStaff=STATE.role==="admin"||STATE.role==="reviewer";
+  return SERVICES.filter(s=>!s.adminOnly||isStaff);
+}
 function renderServices(){
-  document.getElementById("allServices").innerHTML=SERVICES.map(svcCardHTML).join("");
+  document.getElementById("allServices").innerHTML=visibleServices().map(svcCardHTML).join("");
   if(STATE.lang==="en") setTimeout(applyTranslation,0);
 }
 function renderHome(){
-  document.getElementById("homeServices").innerHTML=SERVICES.slice(0,6).map(svcCardHTML).join("");
+  document.getElementById("homeServices").innerHTML=visibleServices().slice(0,6).map(svcCardHTML).join("");
   renderHomeKpis();
   if(STATE.lang==="en") setTimeout(applyTranslation,0);
 }
@@ -3408,6 +3446,9 @@ function renderDashboard(){
   const disbursedList=all.filter(r=>r.status==="disbursed");
   const disbursed=disbursedList.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
   const rate=claimed?Math.round(disbursed/claimed*100):0;
+  // إجمالي مبالغ الدعم الاستثنائي
+  const exceptionalList=all.filter(r=>r.serviceId==="exceptional"||r.serviceName==="الدعم الاستثنائي");
+  const exceptionalTotal=exceptionalList.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
   // اكتشاف تغيّر العدد للفلاش
   const changed=(_dashLastTotal!==-1 && total!==_dashLastTotal);
   _dashLastTotal=total;
@@ -3417,7 +3458,7 @@ function renderDashboard(){
     ${dashKpi("📋","إجمالي الطلبات",total,"جميع الخدمات","t1",changed)}
     ${dashKpi("💰","إجمالي المطالبات",fmtNum(claimed)+" ﷼",fmtNum(claimed)+" ريال","t4",changed)}
     ${dashKpi("✅","إجمالي المصروف",fmtNum(disbursed)+" ﷼",disbursedList.length+" طلب مصروف","t2",changed)}
-    ${dashKpi("📈","نسبة الإنفاق",rate+"%","المصروف ÷ المطالبات","t3",changed)}`;
+    ${dashKpi("⭐","الدعم الاستثنائي",fmtNum(exceptionalTotal)+" ﷼",exceptionalList.length+" طلب استثنائي","t3",changed)}`;
 
   // توزيع الحالات
   renderDashStatus(all);
