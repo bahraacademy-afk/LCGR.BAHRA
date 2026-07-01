@@ -2582,40 +2582,30 @@ function uploadAttachments(fileList, refNo, done){
   }
   next();
 }
-// رفع ملف واحد عبر form مخفي داخل iframe (يتجاوز قيود CORS مع Apps Script)
+// رفع ملف واحد على أجزاء عبر JSONP (يتجاوز حد طول الرابط ومشاكل CORS)
 function uploadOneFile(f, refNo, cb){
-  const cbName="upl_"+Date.now()+"_"+Math.floor(Math.random()*99999);
-  const iframe=document.createElement("iframe");
-  iframe.name=cbName; iframe.style.display="none";
-  document.body.appendChild(iframe);
-
-  const form=document.createElement("form");
-  form.method="POST"; form.action=SHEET_API; form.target=cbName;
-  form.style.display="none";
-  form.enctype="application/x-www-form-urlencoded";
-
-  const payload={action:"upload",name:f.name,mime:f.type,data:f.data,refNo:refNo};
-  const inp=document.createElement("input");
-  inp.type="hidden"; inp.name="payload"; inp.value=JSON.stringify(payload);
-  form.appendChild(inp);
-  document.body.appendChild(form);
-
-  let done=false;
-  const cleanup=()=>{ try{document.body.removeChild(form);document.body.removeChild(iframe);}catch(e){} };
-  // Apps Script يرجّع JSON داخل الـ iframe؛ نقرأه بعد التحميل
-  iframe.onload=()=>{
-    if(done)return; done=true;
-    let res={ok:true,name:f.name,url:""};
-    try{
-      const doc=iframe.contentDocument||iframe.contentWindow.document;
-      const txt=doc.body.innerText||doc.body.textContent||"";
-      if(txt){ const parsed=JSON.parse(txt); if(parsed)res=parsed; }
-    }catch(e){ /* CORS يمنع القراءة أحياناً - نعتبره نجح */ }
-    cleanup(); cb(res);
-  };
-  // مهلة احتياطية
-  setTimeout(()=>{ if(!done){done=true;cleanup();cb({ok:false,error:"timeout"});} },20000);
-  form.submit();
+  const data=f.data||"";
+  const CHUNK=6000;  // حجم الجزء (آمن لطول الرابط)
+  const total=Math.ceil(data.length/CHUNK)||1;
+  const uid="u"+Date.now()+Math.floor(Math.random()*99999);
+  let idx=0;
+  function sendChunk(){
+    if(idx>=total){ return; }
+    const chunk=data.substring(idx*CHUNK,(idx+1)*CHUNK);
+    const isLast=(idx===total-1);
+    const params={uid:uid,idx:idx,total:total,chunk:chunk};
+    if(isLast){ params.name=f.name; params.mime=f.type; params.refNo=refNo; }
+    jsonp("uploadChunk",params,(res)=>{
+      if(isLast){
+        // آخر جزء: الرد فيه نتيجة الرفع
+        if(res&&res.ok){ cb({ok:true,name:f.name,url:res.url||""}); }
+        else{ console.error("فشل رفع الملف",res); cb({ok:false,error:(res&&res.error)||"فشل"}); }
+      } else {
+        idx++; sendChunk();  // نرسل الجزء التالي
+      }
+    });
+  }
+  sendChunk();
 }
 
 /* ============================================================
