@@ -2540,20 +2540,25 @@ function submitForm(){
     completion:null   // للاستكمال لاحقاً
   };
 
-  // رفع المرفقات على Google Drive ثم حفظ الطلب
+  // نحفظ الطلب في الشيت أولاً، ثم نرفع المرفقات (عشان uploadFile يلقى الطلب ويحفظ الرابط فيه)
   const fileList=Object.values(files);
   if(fileList.length && !SHEET_API.includes("PUT_YOUR")){
     closeForm();
-    toast("⏳ جاري رفع المرفقات...","ok");
-    uploadAttachments(fileList, internalRef, (links)=>{
-      req.fileLinks=links;
-      // أضف الروابط لبيانات الحقول عشان تنحفظ في الشيت
-      req.fields._fileLinks=links;
-      STATE.requests.unshift(req); saveRequests();
-      pushToSheet(req);
-      toast("✓ تم إرسال الطلب مع المرفقات ("+req.refNo+")","ok");
-      setTimeout(()=>nav("myrequests"),600);
-    });
+    toast("⏳ جاري حفظ الطلب ورفع المرفقات...","ok");
+    STATE.requests.unshift(req); saveRequests();
+    pushToSheet(req);   // نضيف الطلب أولاً
+    // ننتظر قليلاً حتى يُحفظ الطلب في الشيت، ثم نرفع الملفات
+    setTimeout(()=>{
+      uploadAttachments(fileList, internalRef, (links)=>{
+        req.fileLinks=links;
+        req.fields._fileLinks=links;
+        saveRequests();
+        toast("✓ تم إرسال الطلب مع المرفقات ("+req.refNo+")","ok");
+        // نعيد جلب البيانات من الشيت بعد لحظات لجلب روابط Drive
+        setTimeout(fetchFromSheet,1500);
+        nav("myrequests");
+      });
+    },1200);
   } else {
     STATE.requests.unshift(req); saveRequests();
     pushToSheet(req);
@@ -3946,10 +3951,20 @@ function updateSheetStatus(req){
 function fetchFromSheet(){
   jsonp("list",{},(res)=>{
     if(res&&res.ok&&Array.isArray(res.data)){
-      // دمج مع المحلي حسب refNo
-      const have=new Set(STATE.requests.map(r=>r.refNo));
-      res.data.forEach(r=>{ if(!have.has(r.refNo))STATE.requests.push(r); });
+      res.data.forEach(sheetReq=>{
+        const local=STATE.requests.find(r=>r.refNo===sheetReq.refNo);
+        if(local){
+          // نحدّث الروابط والحالة من الشيت
+          if(sheetReq.fields&&sheetReq.fields._fileLinks){ local.fields._fileLinks=sheetReq.fields._fileLinks; local.fileLinks=sheetReq.fields._fileLinks; }
+          if(sheetReq.fileLinks&&sheetReq.fileLinks.length){ local.fileLinks=sheetReq.fileLinks; }
+          if(sheetReq.completion){ local.completion=sheetReq.completion; }
+        } else {
+          STATE.requests.push(sheetReq);
+        }
+      });
+      saveRequests();
       if(document.getElementById("page-myrequests").classList.contains("active"))renderMyRequests();
+      if(STATE.role==="admin"||STATE.role==="reviewer"){ const a=document.getElementById("page-admin"); if(a&&a.classList.contains("active"))renderAdminTable(); }
     }
   });
 }
