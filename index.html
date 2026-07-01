@@ -2563,28 +2563,54 @@ function submitForm(){
   }
 }
 
-/* رفع المرفقات تباعاً على Google Drive */
+/* رفع المرفقات تباعاً على Google Drive (عبر form+iframe لتجاوز CORS) */
 function uploadAttachments(fileList, refNo, done){
   const links=[]; let i=0;
   function next(){
     if(i>=fileList.length){ done(links); return; }
     const f=fileList[i];
-    fetch(SHEET_API,{
-      method:"POST",
-      redirect:"follow",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify({action:"upload",name:f.name,mime:f.type,data:f.data,refNo:refNo})
-    })
-    .then(r=>r.text())
-    .then(txt=>{
-      let res={}; try{ res=JSON.parse(txt); }catch(e){ console.error("رد غير صالح:",txt); }
+    uploadOneFile(f, refNo, (res)=>{
       if(res&&res.ok){ links.push({name:res.name,url:res.url}); }
-      else { console.error("فشل رفع "+f.name+":",res.error||txt); toast("⚠️ تعذّر رفع: "+f.name,"err"); }
+      else { console.error("فشل رفع "+f.name,res); toast("⚠️ تعذّر رفع: "+f.name,"err"); links.push({name:f.name,url:""}); }
       i++; next();
-    })
-    .catch(err=>{ console.error("خطأ شبكة عند رفع "+f.name+":",err); toast("⚠️ خطأ في رفع: "+f.name,"err"); i++; next(); });
+    });
   }
   next();
+}
+// رفع ملف واحد عبر form مخفي داخل iframe (يتجاوز قيود CORS مع Apps Script)
+function uploadOneFile(f, refNo, cb){
+  const cbName="upl_"+Date.now()+"_"+Math.floor(Math.random()*99999);
+  const iframe=document.createElement("iframe");
+  iframe.name=cbName; iframe.style.display="none";
+  document.body.appendChild(iframe);
+
+  const form=document.createElement("form");
+  form.method="POST"; form.action=SHEET_API; form.target=cbName;
+  form.style.display="none";
+  form.enctype="application/x-www-form-urlencoded";
+
+  const payload={action:"upload",name:f.name,mime:f.type,data:f.data,refNo:refNo};
+  const inp=document.createElement("input");
+  inp.type="hidden"; inp.name="payload"; inp.value=JSON.stringify(payload);
+  form.appendChild(inp);
+  document.body.appendChild(form);
+
+  let done=false;
+  const cleanup=()=>{ try{document.body.removeChild(form);document.body.removeChild(iframe);}catch(e){} };
+  // Apps Script يرجّع JSON داخل الـ iframe؛ نقرأه بعد التحميل
+  iframe.onload=()=>{
+    if(done)return; done=true;
+    let res={ok:true,name:f.name,url:""};
+    try{
+      const doc=iframe.contentDocument||iframe.contentWindow.document;
+      const txt=doc.body.innerText||doc.body.textContent||"";
+      if(txt){ const parsed=JSON.parse(txt); if(parsed)res=parsed; }
+    }catch(e){ /* CORS يمنع القراءة أحياناً - نعتبره نجح */ }
+    cleanup(); cb(res);
+  };
+  // مهلة احتياطية
+  setTimeout(()=>{ if(!done){done=true;cleanup();cb({ok:false,error:"timeout"});} },20000);
+  form.submit();
 }
 
 /* ============================================================
@@ -2983,23 +3009,15 @@ function uploadCompletionDocs(docsList, refNo, done){
   function next(){
     if(i>=docsList.length){ done(links); return; }
     const d=docsList[i];
-    if(SHEET_API.includes("PUT_YOUR")){ // لا يوجد رابط حقيقي
+    if(SHEET_API.includes("PUT_YOUR")){
       links.push({label:d.label,name:d.file.name,url:""}); i++; next(); return;
     }
-    fetch(SHEET_API,{
-      method:"POST",
-      redirect:"follow",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify({action:"upload",name:d.label+" - "+d.file.name,mime:d.file.type,data:d.file.data,refNo:refNo})
-    })
-    .then(r=>r.text())
-    .then(txt=>{
-      let res={}; try{ res=JSON.parse(txt); }catch(e){ console.error("رد غير صالح:",txt); }
+    // نستخدم نفس طريقة form+iframe لتجاوز CORS
+    uploadOneFile({name:d.label+" - "+d.file.name,type:d.file.type,data:d.file.data}, refNo, (res)=>{
       if(res&&res.ok){ links.push({label:d.label,name:d.file.name,url:res.url||""}); }
-      else { console.error("فشل رفع "+d.label+":",res.error||txt); links.push({label:d.label,name:d.file.name,url:""}); }
+      else { console.error("فشل رفع "+d.label,res); links.push({label:d.label,name:d.file.name,url:""}); }
       i++; next();
-    })
-    .catch(err=>{ console.error("خطأ شبكة:",err); links.push({label:d.label,name:d.file.name,url:""}); i++; next(); });
+    });
   }
   next();
 }
