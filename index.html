@@ -2026,6 +2026,7 @@ const I18N = {
   "الدعم الاستثنائي":"Exceptional Support",
   "دعم استثنائي يُقدّم من الإدارة لحالات خاصة خارج نطاق الخدمات الاعتيادية.":"Exceptional support provided by management for special cases beyond standard services.",
   "نوع الدعم":"Support Type",
+  "✏️ تعديل الطلب":"✏️ Edit Request",
   "المبلغ (ر.س)":"Amount (SAR)",
   "ملف الفاتورة / التحويل / الإيصال":"Invoice / Transfer / Receipt File",
   "طلب استثنائي":"exceptional requests",
@@ -2400,7 +2401,22 @@ function openForm(svcId){
   document.getElementById("formBody").innerHTML=html;
   document.getElementById("formOverlay").classList.add("show");
 }
-function closeForm(){document.getElementById("formOverlay").classList.remove("show");}
+function closeForm(){document.getElementById("formOverlay").classList.remove("show");STATE._editingReqId=null;}
+
+// تعديل طلب دعم استثنائي موجود
+function editExceptional(reqId){
+  const r=STATE.requests.find(x=>x.id===reqId); if(!r)return;
+  openForm("exceptional");
+  STATE._editingReqId=reqId;  // نعلّم إننا في وضع تعديل
+  document.getElementById("formTitle").textContent="✏️ تعديل: "+r.serviceName;
+  // نعبّئ القيم الحالية
+  const f=r.fields||{};
+  setTimeout(()=>{
+    const st=document.getElementById("fld_support_type"); if(st)st.value=f.support_type||"";
+    const cp=document.getElementById("fld_company"); if(cp)cp.value=f.company||r.company||"";
+    const pr=document.getElementById("fld_price_offer"); if(pr)pr.value=f.price_offer||r.amount||"";
+  },50);
+}
 function onFile(k){
   const inp=document.getElementById("fld_"+k);
   if(inp.files&&inp.files[0]){
@@ -2465,13 +2481,43 @@ function submitForm(){
     else if(el) el.style.borderColor="";
     data[f.k]=v;
   }
-  // تحقق الملفات المطلوبة
+  // تحقق الملفات المطلوبة (نتخطّاه في وضع التعديل لأن المرفق موجود مسبقاً)
   const reqFiles=s.fields.filter(f=>f.t==="file"&&f.req);
   const files=STATE.currentFiles||{};
-  for(const ff of reqFiles){ if(!files[ff.k]){ ok=false; } }
+  if(!STATE._editingReqId){
+    for(const ff of reqFiles){ if(!files[ff.k]){ ok=false; } }
+  }
   if(!ok){ toast("الرجاء تعبئة الحقول والمرفقات المطلوبة","err"); if(firstBad)firstBad.focus(); return; }
 
   const fileNames=Object.values(files).map(f=>f.name).join("، ");
+
+  // ═══ وضع التعديل: تحديث طلب موجود ═══
+  if(STATE._editingReqId){
+    const r=STATE.requests.find(x=>x.id===STATE._editingReqId);
+    if(r){
+      r.company=data.company||r.company;
+      r.amount=data.price_offer||r.amount;
+      r.fields=Object.assign({},r.fields,data);
+      if(fileNames){ r.fileName=fileNames; }
+      const newFiles=Object.values(files);
+      if(newFiles.length && !SHEET_API.includes("PUT_YOUR")){
+        closeForm(); toast("⏳ جاري رفع المرفق...","ok");
+        uploadAttachments(newFiles, r.refNo, (links)=>{
+          r.fileLinks=links; r.fields._fileLinks=links;
+          saveRequests(); pushToSheet(r);
+          toast("✓ تم تحديث الطلب ("+r.refNo+")","ok");
+          renderMyRequests(); if(STATE.role==="admin"||STATE.role==="reviewer")renderAdminTable();
+        });
+      } else {
+        saveRequests(); pushToSheet(r); closeForm();
+        toast("✓ تم تحديث الطلب ("+r.refNo+")","ok");
+        renderMyRequests(); if(STATE.role==="admin"||STATE.role==="reviewer")renderAdminTable();
+      }
+    }
+    STATE._editingReqId=null;
+    return;
+  }
+
   // توليد الرقم الداخلي: كود الشركة + السنة + تسلسل (BCC-2026-0001)
   const company=data.company||"";
   const compCode=companyCode(company);
@@ -2487,7 +2533,7 @@ function submitForm(){
     country:data.target_country||"-",
     amount:data.price_offer||"0",
     currency:"ريال سعودي",
-    status:DEFAULT_STATUS, note:"", date:new Date().toISOString().slice(0,10),
+    status:(s.id==="exceptional"?"disbursed":DEFAULT_STATUS), note:"", date:new Date().toISOString().slice(0,10),
     fields:data, fileName:fileNames,
     fileLinks:[],     // روابط المرفقات على Drive
     ministryRef:"",   // رقم الوزارة - يدخله المدقق لاحقاً
@@ -3020,6 +3066,10 @@ function viewDetail(id){
   if(STATE.role==="admin"||STATE.role==="reviewer"){
     const next=getNextStage(r.status);
     let btns="";
+    // تعديل طلب الدعم الاستثنائي
+    if(r.serviceId==="exceptional"){
+      btns+=`<button class="btn btn-primary" onclick="closeDetail();editExceptional('${r.id}')">✏️ تعديل الطلب</button>`;
+    }
     if(next){
       btns+=`<button class="btn btn-primary" onclick="advanceStatus('${r.id}');closeDetail()">▶ ${STATUS_MAP[next].label}</button>`;
     }
