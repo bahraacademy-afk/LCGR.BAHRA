@@ -1599,16 +1599,10 @@ const SERVICES = [
     desc:"دعم استثنائي يُقدّم من الإدارة لحالات خاصة خارج نطاق الخدمات الاعتيادية.",
     icon:"⭐", code:"EXCP", adminOnly:true,
     fields:[
+      {k:"support_type",l:"نوع الدعم",t:"text",req:true},
       {k:"company",l:"الشركة",t:"select",req:true,opts:COMPANIES},
-      {k:"target_country",l:"دولة السوق المستهدف",t:"select",req:true,opts:COUNTRIES},
-      {k:"support_reason",l:"سبب الدعم الاستثنائي",t:"textarea",req:true},
-      {k:"price_offer",l:"مبلغ الدعم المطلوب (ر.س)",t:"number",req:true},
-      {k:"expected_revenue",l:"الإيرادات الإضافية المتوقعة (ر.س)",t:"number",req:false},
-      {k:"start_date",l:"تاريخ بداية الاستفادة",t:"date",req:true},
-      {k:"end_date",l:"تاريخ الانتهاء",t:"date",req:false},
-      {k:"desc",l:"تفاصيل إضافية",t:"textarea",req:false},
-      {k:"doc_justification",l:"مستندات التبرير",t:"file",req:true},
-      {k:"doc_extra",l:"مرفقات إضافية",t:"file",req:false}
+      {k:"price_offer",l:"المبلغ (ر.س)",t:"number",req:true},
+      {k:"doc_receipt",l:"ملف الفاتورة / التحويل / الإيصال",t:"file",req:true}
     ]
   }
 ];
@@ -2031,9 +2025,9 @@ const I18N = {
   "المرجع الداخلي للمنصة:":"Internal Platform Reference:",
   "الدعم الاستثنائي":"Exceptional Support",
   "دعم استثنائي يُقدّم من الإدارة لحالات خاصة خارج نطاق الخدمات الاعتيادية.":"Exceptional support provided by management for special cases beyond standard services.",
-  "سبب الدعم الاستثنائي":"Reason for Exceptional Support",
-  "مبلغ الدعم المطلوب (ر.س)":"Requested Support Amount (SAR)",
-  "مستندات التبرير":"Justification Documents",
+  "نوع الدعم":"Support Type",
+  "المبلغ (ر.س)":"Amount (SAR)",
+  "ملف الفاتورة / التحويل / الإيصال":"Invoice / Transfer / Receipt File",
   "طلب استثنائي":"exceptional requests",
   "اضغط للتفاصيل ←":"Click for details →",
   "⚙️ إعدادات المظهر":"⚙️ Appearance Settings",
