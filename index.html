@@ -2588,11 +2588,13 @@ function uploadOneFile(f, refNo, cb){
     const fd=new FormData();
     fd.append("file",dataUri);
     fd.append("upload_preset",CLOUDINARY_PRESET);
-    // نحدد نوع الرفع: الصور كـ image، المستندات (PDF/Word) كـ raw
-    const isImage=/^image\//.test(f.type||"");
-    const resourceType=isImage?"image":"raw";
-    // public_id إنجليزي/أرقام + الامتداد (عشان الملف يتحمّل بصيغته الصحيحة)
+    // نوع الرفع: PDF والصور كـ image (تُعرض في المتصفح مباشرة)، باقي المستندات كـ raw
+    const mime=(f.type||"").toLowerCase();
     const ext=((f.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const isImage=/^image\//.test(mime);
+    const isPdf=(mime==="application/pdf"||ext==="pdf");
+    // PDF والصور → image (يفتح في المتصفح)؛ غيرهم (word/excel) → raw
+    const resourceType=(isImage||isPdf)?"image":"raw";
     const rand=Math.random().toString(36).substring(2,8);
     const publicId=(refNo?refNo.replace(/[^\w-]/g,"")+"_":"")+"file_"+rand+(ext?"."+ext:"");
     fd.append("public_id",publicId);
@@ -2601,7 +2603,10 @@ function uploadOneFile(f, refNo, cb){
       .then(r=>r.json())
       .then(res=>{
         if(res&&res.secure_url){
-          cb({ok:true,name:f.name,url:res.secure_url});
+          let finalUrl=res.secure_url;
+          // المستندات raw (word/excel) نضيف fl_attachment للتحميل
+          if(resourceType==="raw"){ finalUrl=res.secure_url.replace("/upload/","/upload/fl_attachment/"); }
+          cb({ok:true,name:f.name,url:finalUrl});
         } else {
           console.error("فشل رفع Cloudinary",res);
           cb({ok:false,error:(res&&res.error&&res.error.message)||"فشل الرفع"});
