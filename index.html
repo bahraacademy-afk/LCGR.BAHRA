@@ -2591,16 +2591,19 @@ function uploadOneFile(f, refNo, cb){
     // نحدد نوع الرفع: الصور كـ image، المستندات (PDF/Word) كـ raw
     const isImage=/^image\//.test(f.type||"");
     const resourceType=isImage?"image":"raw";
-    // public_id إنجليزي/أرقام فقط (الأحرف العربية تكسر رابط Cloudinary)
+    // public_id إنجليزي/أرقام + الامتداد (عشان الملف يتحمّل بصيغته الصحيحة)
+    const ext=((f.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const rand=Math.random().toString(36).substring(2,8);
-    const publicId=(refNo?refNo.replace(/[^\w-]/g,"")+"_":"")+"file_"+rand;
+    const publicId=(refNo?refNo.replace(/[^\w-]/g,"")+"_":"")+"file_"+rand+(ext?"."+ext:"");
     fd.append("public_id",publicId);
     const url="https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD+"/"+resourceType+"/upload";
     fetch(url,{method:"POST",body:fd})
       .then(r=>r.json())
       .then(res=>{
         if(res&&res.secure_url){
-          cb({ok:true,name:f.name,url:res.secure_url});
+          // نضيف fl_attachment عشان يتحمّل بامتداده الصحيح (PDF/صورة) بدل صيغة غريبة
+          const finalUrl=res.secure_url.replace("/upload/","/upload/fl_attachment/");
+          cb({ok:true,name:f.name,url:finalUrl});
         } else {
           console.error("فشل رفع Cloudinary",res);
           cb({ok:false,error:(res&&res.error&&res.error.message)||"فشل الرفع"});
