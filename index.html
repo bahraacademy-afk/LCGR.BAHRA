@@ -2601,9 +2601,7 @@ function uploadOneFile(f, refNo, cb){
       .then(r=>r.json())
       .then(res=>{
         if(res&&res.secure_url){
-          // نضيف fl_attachment عشان يتحمّل بامتداده الصحيح (PDF/صورة) بدل صيغة غريبة
-          const finalUrl=res.secure_url.replace("/upload/","/upload/fl_attachment/");
-          cb({ok:true,name:f.name,url:finalUrl});
+          cb({ok:true,name:f.name,url:res.secure_url});
         } else {
           console.error("فشل رفع Cloudinary",res);
           cb({ok:false,error:(res&&res.error&&res.error.message)||"فشل الرفع"});
