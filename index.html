@@ -918,6 +918,37 @@ header::before{ content:""; position:absolute; top:0; left:0; right:0; height:3p
 /* أزرار أساسية: لون صلب بدون تدرج */
 .btn-primary, .svc-btn{ background:var(--primary) !important; }
 .btn-primary:hover, .svc-btn:hover{ background:var(--primary-dark) !important; }
+
+/* ═══════════════════════════════════════════════
+   توحيد درجة الخلفية — الجدول والفلاتر والبحث بنفس اللون
+   (يمنع تفاوت الغامق/الفاتح في صفحة الطلبات)
+   ═══════════════════════════════════════════════ */
+/* رأس الجدول: نفس درجة البطاقة، يتميّز بالحد السفلي فقط */
+thead th{
+  background:var(--bg2) !important;
+  color:var(--text-soft) !important;
+  border-bottom:2px solid var(--border) !important;
+}
+.tbl-wrap thead th:last-child{ background:var(--bg2) !important; }
+/* صفوف الجدول: شفافة (ترث خلفية البطاقة) */
+tbody td{ background:transparent !important; }
+.tbl-wrap td:last-child{ background:var(--card) !important; }
+/* تمييز التمرير: درجة خفيفة محايدة */
+tbody tr:hover{ background:var(--bg) !important; }
+tbody tr:hover td:last-child{ background:var(--bg) !important; }
+/* الفلاتر (القوائم المنسدلة) والبحث: نفس درجة البطاقة */
+.flt-select, .search-box input{
+  background:var(--bg2) !important;
+  border:1px solid var(--border) !important;
+  color:var(--text) !important;
+  box-shadow:none !important;
+}
+.flt-select:focus, .search-box input:focus{
+  border-color:var(--primary) !important;
+  box-shadow:0 0 0 2px var(--primary) !important;
+}
+/* حاوية الفلاتر/شريط البحث: نفس درجة البطاقة (بدون تباين) */
+.tbl-wrap, table{ background:transparent !important; }
 </style>
 </head>
 <body>
