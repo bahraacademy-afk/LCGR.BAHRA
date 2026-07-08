@@ -878,7 +878,7 @@ header, .sidebar, .svc-card, .kpi-card, .glass-card, .dash-card,
 }
 /* أسطح صلبة بدل التدرجات الزجاجية للبطاقات */
 .svc-card, .kpi-card, .glass-card, .dash-card{
-  background:#ffffff !important;
+  background:var(--card-solid) !important;
   border:1px solid var(--border) !important;
   box-shadow:var(--shadow) !important;
 }
@@ -892,9 +892,9 @@ header, .sidebar, .svc-card, .kpi-card, .glass-card, .dash-card,
 .svc-card::after, .kpi-card::after{ display:none !important; content:none !important; }
 /* إزالة تأثير اللمعان المتحرك على الأزرار */
 .btn-primary::before, .svc-btn::before{ display:none !important; }
-/* الهيدر والقائمة الجانبية: أبيض صلب مع حد سفلي رسمي */
-header{ background:#ffffff !important; border-bottom:2px solid var(--primary) !important; box-shadow:var(--shadow) !important; }
-.sidebar{ background:#ffffff !important; border-left:1px solid var(--border) !important; box-shadow:none !important; }
+/* الهيدر والقائمة الجانبية: يتكيّفان مع الوضع (فاتح/داكن) */
+header{ background:var(--card-solid) !important; border-bottom:2px solid var(--primary) !important; box-shadow:var(--shadow) !important; }
+.sidebar{ background:var(--card-solid) !important; border-left:1px solid var(--border) !important; box-shadow:none !important; }
 /* شريط علوي رفيع بلون الهوية أعلى الصفحة (لمسة حكومية) */
 header::before{ content:""; position:absolute; top:0; left:0; right:0; height:3px; background:var(--primary); }
 /* تهدئة الحركة: إبقاء transitions بسيطة فقط، إلغاء الحركات التلقائية */
